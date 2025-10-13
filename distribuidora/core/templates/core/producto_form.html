@@ -1,0 +1,25 @@
+﻿{% extends 'core/base.html' %}
+{% load static %}
+{% block title %}{% if form.instance.id %}Editar{% else %}Crear{% endif %} Producto{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h1>{% if form.instance.id %}Editar{% else %}Crear{% endif %} Producto</h1>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="mb-3">
+                {{ field.label_tag }}
+                {{ field }}
+                {% if field.errors %}
+                    <div class="alert alert-danger">{{ field.errors }}</div>
+                {% endif %}
+            </div>
+        {% endfor %}
+        {% if error %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a href="{% url 'admin_home' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

@@ -1,46 +1,46 @@
-﻿{% extends 'core/base.html' %}
-{% load static %}
-{% block title %}Catálogo - Distribuidora Talagante{% endblock %}
-{% block content %}
+﻿    {% extends 'core/base.html' %}
+    {% load static %}
+    {% block title %}Catálogo - Distribuidora Talagante{% endblock %}
+    {% block content %}
 
-<div class="container mt-5">
-  <h1>Catálogo de Productos</h1>
-  <form method="GET" class="mb-4">
-    <div class="row">
-      <div class="col-md-4">
-        <input type="text" name="categoria" class="form-control" placeholder="Filtro por categoría" value="{{ request.GET.categoria }}">
-      </div>
-      <div class="col-md-4">
-        <input type="number" name="precio_max" class="form-control" placeholder="Precio máximo" value="{{ request.GET.precio_max }}">
-      </div>
-      <div class="col-md-4">
-        <button type="submit" class="btn btn-primary">Filtrar</button>
-      </div>
-    </div>
-  </form>
-
-  <div class="row">
-    {% if productos %}
-      {% for producto in productos %}
-        <div class="col-md-4 product-card">
-          <div class="card">
-            {% if producto.imagen %}
-              <img src="{{ producto.imagen.url }}" class="card-img-top product-img" alt="{{ producto.nombre }}">
-            {% else %}
-              <img src="https://via.placeholder.com/200x200?text=No+Imagen" class="card-img-top product-img" alt="{{ producto.nombre }}">
-            {% endif %}
-            <div class="card-body">
-              <h5 class="card-title">{{ producto.nombre }}</h5>
-              <p class="card-text">Precio: ${{ producto.precio }}</p>
-              <p class="card-text">Categoría: {{ producto.categoria }}</p>
-              <a href="{% url 'add_to_carrito' producto.id %}" class="btn btn-success">Añadir al Carrito</a>
-            </div>
+    <div class="container mt-5">
+      <h1>Catálogo de Productos</h1>
+      <form method="GET" class="mb-4">
+        <div class="row">
+          <div class="col-md-4">
+            <input type="text" name="categoria" class="form-control" placeholder="Filtro por categoría" value="{{ request.GET.categoria }}">
+          </div>
+          <div class="col-md-4">
+            <input type="number" name="precio_max" class="form-control" placeholder="Precio máximo" value="{{ request.GET.precio_max }}">
+          </div>
+          <div class="col-md-4">
+            <button type="submit" class="btn btn-primary">Filtrar</button>
           </div>
         </div>
-      {% endfor %}
-    {% else %}
-      <p>No hay productos disponibles en esta categoría o rango de precio.</p>
-    {% endif %}
-  </div>
-</div>
-{% endblock %}
+      </form>
+
+      <div class="row">
+        {% if productos %}
+          {% for producto in productos %}
+            <div class="col-md-4 product-card">
+              <div class="card">
+                {% if producto.imagen %}
+                  <img src="{{ producto.imagen.url }}" class="card-img-top product-img" alt="{{ producto.nombre }}">
+                {% else %}
+                  <img src="https://via.placeholder.com/200x200?text=No+Imagen" class="card-img-top product-img" alt="{{ producto.nombre }}">
+                {% endif %}
+                <div class="card-body">
+                  <h5 class="card-title">{{ producto.nombre }}</h5>
+                  <p class="card-text">Precio: ${{ producto.precio }}</p>
+                  <p class="card-text">Categoría: {{ producto.categoria }}</p>
+                  <a href="{% url 'add_to_carrito' producto.id %}" class="btn btn-success">Añadir al Carrito</a>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p>No hay productos disponibles en esta categoría o rango de precio.</p>
+        {% endif %}
+      </div>
+    </div>
+    {% endblock %}

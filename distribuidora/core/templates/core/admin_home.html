@@ -1,0 +1,141 @@
+﻿<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script>{% extends 'core/base.html' %}
+{% load static %}
+{% block title %}Panel de Administración - Distribuidora Talagante{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h1>Panel de Administración</h1>
+    <p>Bienvenido, {{ user.username }} (Superusuario)</p>
+
+    {% if messages %}
+        <div class="alert alert-dismissible fade show" role="alert">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endif %}
+
+    <div class="row">
+        <!-- Sección de Gestión de Productos -->
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Gestión de Productos</h2>
+                </div>
+                <div class="card-body">
+                    <p>Accede al CRUD de productos para crear, editar o eliminar.</p>
+                    <a href="{% url 'producto_list' %}" class="btn btn-primary mb-2">Ver Lista de Productos</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección de Notificaciones -->
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Notificaciones</h2>
+                </div>
+                <div class="card-body">
+                    <p>Revisa alertas de bajo stock u otras notificaciones.</p>
+                    <ul class="list-group mb-3">
+                        {% for producto in productos_bajo_stock %}
+                            <li class="list-group-item list-group-item-warning">
+                                Producto "{{ producto.nombre }}" tiene bajo stock ({{ producto.stock }} unidades).
+                            </li>
+                        {% empty %}
+                            <li class="list-group-item">No hay notificaciones de stock bajo.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección de Gestión de Órdenes -->
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Gestión de Órdenes</h2>
+                </div>
+                <div class="card-body">
+                    <p>Accede a órdenes pendientes y detalles.</p>
+                    <a href="{% url 'admin_home' %}#ordenes-list" class="btn btn-info mb-2">Ver Órdenes Pendientes</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Órdenes Pendientes -->
+    <div id="ordenes-list" class="mt-5">
+        <h2>Órdenes Pendientes</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Usuario</th>
+                    <th>Fecha</th>
+                    <th>Total (CLP)</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for orden in ordenes %}
+                    <tr>
+                        <td>{{ orden.id }}</td>
+                        <td>{{ orden.usuario.username }}</td>
+                        <td>{{ orden.fecha }}</td>
+                        <td>{{ orden.total|floatformat:2 }}</td>
+                        <td>{{ orden.estado }}</td>
+                        <td>
+                            <a href="{% url 'orden_detail' orden.id %}" class="btn btn-sm btn-info">Ver Detalle</a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6">No hay órdenes pendientes.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
