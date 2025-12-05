@@ -10,9 +10,45 @@
         #codigo-input { font-size: 4rem; text-align: center; height: 120px; }
         .cantidad-box { font-size: 3rem; }
         .beep { display: none; }
+
+        body { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding-top: 10vh;
+        }
+        .card-escaneo {
+            max-width: 700px;
+            margin: 0 auto;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        #codigo-input { 
+            font-size: 4.5rem; 
+            height: 140px; 
+            text-align: center; 
+            font-weight: bold;
+            letter-spacing: 8px;
+        }
+        .cantidad-box { font-size: 3.5rem; }
+        .beep { display: none; }
+        .btn-volver {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 9999;
+        }
     </style>
 </head>
 <body>
+<!-- BOTÓN PARA VOLVER AL PANEL DE ADMIN -->
+<a href="{% url 'admin_home' %}" class="btn btn-light btn-lg rounded-pill shadow-lg btn-volver d-flex align-items-center gap-3">
+    <i class="bi bi-arrow-left-circle-fill fs-3"></i>
+    <div class="text-start">
+        <div class="fw-bold">Volver al</div>
+        <div class="fs-5">Panel Admin</div>
+    </div>
+</a>
 <div class="container text-center">
     <h1 class="display-3 mb-5">Escanea el código</h1>
 
