@@ -14,13 +14,14 @@
         {% endfor %}
       </select>
       <input type="number" min="0" step="100" name="precio_max" value="{{ request.GET.precio_max }}" placeholder="Precio máx.">
-      <button class="btn btn-outline" type="submit">Filtrar</button>
+      <button class="btn btn-primary" type="submit">Filtrar</button>
     </form>
 
     <section class="product-grid">
       {% if productos %}
         {% for p in productos %}
           <article class="product-card">
+            
             <div class="product-media">
               {% if p.imagen %}
                 <img src="{{ p.imagen.url }}" alt="{{ p.nombre }}">
@@ -28,17 +29,26 @@
                 <img src="{% static 'core/img/placeholder.png' %}" alt="{{ p.nombre }}">
               {% endif %}
             </div>
+
             <div class="product-body">
+              
+              <div class="product-price">${{ p.precio|floatformat:0 }}</div>
+
               <h3 class="product-title">{{ p.nombre }}</h3>
               <div class="product-cat">{{ p.categoria }}</div>
-              <div class="price-row">
-                <span class="product-price">${{ p.precio }}</span>
+
+              <div class="price-row mt-auto">
                 {% if p.stock|default:0 > 0 and p.activo %}
-                  <a class="btn btn-primary" href="{% url 'add_to_carrito' p.id %}">Añadir</a>
+                  <a class="btn btn-primary w-100" href="{% url 'add_to_carrito' p.id %}">
+                    Agregar al Carrito
+                  </a>
                 {% else %}
-                  <button class="btn btn-muted" type="button" disabled>Sin stock</button>
+                  <button class="btn btn-outline-dark w-100" type="button" disabled style="opacity: 0.5;">
+                    Agotado
+                  </button>
                 {% endif %}
               </div>
+
             </div>
           </article>
         {% endfor %}

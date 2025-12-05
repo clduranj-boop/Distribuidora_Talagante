@@ -1,297 +1,628 @@
-﻿/* ===========================
-   Home (claro)
-   =========================== */
-.hero{background:linear-gradient(to right,#f8f9fa,#e9ecef);padding:50px 0;text-align:center}
-.hero h1{font-size:3rem;font-weight:bold;color:#343a40}
-.hero p{font-size:1.25rem;color:#6c757d}
-.carousel-item img{height:500px;object-fit:cover;border-radius:15px}
-.quick-links a{margin:0 15px;font-size:1.1rem}
-
-/* ===========================
-   Variables / base
-   =========================== */
-:root{
-  --bg:#0b0d10;
-  --card:#14181d;
-  --muted:#9aa4b2;
-  --text:#e7eef7;
-  --accent:#0d6efd;
-  --radius:18px;
-  --shadow:0 10px 24px rgba(0,0,0,.12);
-  --nav-h:62px;
-}
-body,input,select,button,table,.btn,.badge{
-  font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans","Liberation Sans","Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji",sans-serif;
-  line-height:1.5;
-}
-.container{max-width:1100px;margin:0 auto;padding:16px}
-
-/* ===========================
-   NAVBAR e-commerce (global)
-   =========================== */
-.navbar.site-nav{
-  min-height:var(--nav-h);
-  padding-top:.25rem; padding-bottom:.25rem;
-  background:linear-gradient(180deg,#0d6efd,#0a58ca)!important;
-  box-shadow:0 6px 18px rgba(13,110,253,.25);
-}
-.navbar.site-nav .navbar-brand{
-  color:#fff!important;font-weight:700;font-size:1.18rem;letter-spacing:.2px;text-decoration:none!important
-}
-.navbar.site-nav .nav-link{
-  color:#eaf1ff!important;font-weight:600;font-size:1.06rem;padding:.6rem .9rem;text-decoration:none!important
-}
-.navbar.site-nav .nav-link:hover{color:#fff!important}
-.navbar.site-nav .nav-link.active{color:#fff!important;position:relative}
-.navbar.site-nav .nav-link.active::after{
-  content:"";position:absolute;left:.6rem;right:.6rem;bottom:.35rem;height:2px;border-radius:2px;background:#fff;opacity:.95
-}
-.navbar.site-nav .navbar-toggler{border-color:rgba(255,255,255,.35)!important}
-.navbar.site-nav .navbar-toggler-icon{filter:brightness(105%)!important}
-
-/* ===========================
-   Botones
-   =========================== */
-.btn{appearance:none;border:1px solid transparent;border-radius:10px;padding:10px 14px;font-weight:600;cursor:pointer;transition:.2s ease}
-.btn-primary{background:var(--accent);color:#fff}
-.btn-primary:hover{filter:brightness(.95)}
-.btn-outline{background:#fff;color:#0b0d10;border-color:#e9ecef}
-.btn-outline:hover{border-color:#cbd3da}
-.btn-danger{background:#dc3545;color:#fff}
-.btn-muted{background:#f1f3f5;color:#212529}
-
-/* ===========================
-   HOME
-   =========================== */
-.home .features{display:grid;grid-template-columns:repeat(12,1fr);gap:18px;margin:28px 0}
-.home .feature-card{grid-column:span 12;background:#fff;border:1px solid #e9ecef;border-radius:16px;padding:20px;box-shadow:0 8px 18px rgba(0,0,0,.06)}
-@media(min-width:768px){.home .feature-card{grid-column:span 4}}
-.home .feature-card h3{margin:0 0 8px 0}
-.home .cta-row{display:flex;justify-content:center;gap:12px;margin:18px 0}
-
-/* ===========================
-   CATÁLOGO
-   =========================== */
-.catalogo{background:#f6f8fb;color:#212529}
-.catalogo .filters{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 8px}
-.catalogo .filters input,.catalogo .filters select{padding:10px 12px;border:1px solid #e9ecef;border-radius:10px;background:#fff}
-.catalogo .product-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:18px;margin:14px 0 26px}
-.catalogo .product-card{grid-column:span 12;background:#fff;border:1px solid #e9ecef;border-radius:16px;overflow:hidden;box-shadow:0 10px 18px rgba(0,0,0,.05);transition:transform .2s,box-shadow .2s;display:flex;flex-direction:column}
-@media(min-width:600px){.catalogo .product-card{grid-column:span 6}}
-@media(min-width:900px){.catalogo .product-card{grid-column:span 4}}
-.catalogo .product-media{position:relative;aspect-ratio:4/3;background:#f1f3f5}
-.catalogo .product-media img{width:100%;height:100%;object-fit:cover;display:block}
-.catalogo .product-body{padding:14px;display:flex;flex-direction:column;gap:8px}
-.catalogo .product-title{font-weight:600;margin:0}
-.catalogo .product-cat{color:#6c757d;font-size:13px}
-.catalogo .price-row{display:flex;align-items:center;justify-content:space-between;margin-top:auto}
-.catalogo .product-price{font-weight:700;font-size:18px}
-.catalogo .product-card:hover{transform:translateY(-4px);box-shadow:0 16px 26px rgba(0,0,0,.08)}
-.catalogo .card,.catalogo .producto,.catalogo .item{border-radius:16px;border:1px solid #e9ecef;background:#fff}
-
-/* ===========================
-   CARRITO
-   =========================== */
-.carrito{background:#f6f8fb;color:#212529}
-.carrito .cart-wrap{display:grid;grid-template-columns:1fr;gap:18px;margin-top:18px}
-@media(min-width:900px){.carrito .cart-wrap{grid-template-columns:2fr 1fr}}
-.carrito .cart-table{background:#fff;border:1px solid #e9ecef;border-radius:16px;box-shadow:0 8px 18px rgba(0,0,0,.06);overflow:hidden}
-.carrito table{width:100%;border-collapse:collapse}
-.carrito th,.carrito td{padding:12px 14px;border-bottom:1px solid #f1f3f5;text-align:left}
-.carrito th{background:#f8f9fa;font-weight:700}
-.carrito .prod-cell{display:flex;align-items:center;gap:12px}
-.carrito .thumb{width:56px;height:56px;object-fit:cover;border-radius:10px;border:1px solid #e9ecef;background:#f8f9fa}
-.carrito .summary{background:#fff;border:1px solid #e9ecef;border-radius:16px;box-shadow:0 8px 18px rgba(0,0,0,.06);padding:18px}
-.carrito .summary h3{margin-top:0}
-.carrito .sum-row{display:flex;justify-content:space-between;margin:6px 0}
-.carrito .sum-total{font-size:20px;font-weight:800}
-
-/* ===========================
-   CHECKOUT
-   =========================== */
-.checkout{background:#f6f8fb;color:#212529}
-.checkout .checkout-grid{display:grid;grid-template-columns:1fr;gap:18px;margin-top:18px}
-@media(min-width:900px){.checkout .checkout-grid{grid-template-columns:2fr 1fr}}
-.checkout .panel{background:#fff;border:1px solid #e9ecef;border-radius:16px;box-shadow:0 8px 18px rgba(0,0,0,.06);padding:18px}
-.checkout .panel h3{margin-top:0}
-
-/* ============================
-   LAYOUT GLOBAL: sticky footer
-   ============================ */
-body.site{min-height:100vh;display:flex;flex-direction:column;}
-.site-main{flex:1;}
-.global-footer{margin-top:auto;} /* empuja el footer al fondo cuando hay poco contenido */
-
-
-/* ================================
-   MIS COMPRAS — filtros mejorados
-   ================================ */
-.mis-compras .filters{
-  display:flex;
-  gap:12px;
-  flex-wrap:wrap;
-  align-items:center;
+﻿/* =========================================
+   1. VARIABLES Y CONFIGURACIÓN BASE
+   Estilo: "Verde Oliva, Gris y Negro"
+   ========================================= */
+  :root {
+    /* Paleta de colores */
+    --color-primary: #748C28;       /* Verde Oliva Principal */
+    --color-primary-hover: #5e7220; /* Verde más oscuro para hover */
+    --color-dark: #1a1a1a;          /* Negro casi puro para textos/footer */
+    --color-gray-bg: #f4f4f4;       /* Gris muy claro de fondo */
+    --color-white: #ffffff;
+    --color-border: #e0e0e0;
+    
+    /* Configuración de UI */
+    --radius-btn: 50px;             /* Botones estilo píldora */
+    --radius-card: 12px;            /* Tarjetas redondeadas */
+    --shadow-card: 0 4px 12px rgba(0,0,0,0.08);
+    
+    /* IMPORTANTE: Nueva fuente moderna */
+    --font-main: 'Poppins', system-ui, -apple-system, sans-serif;
 }
 
-/* Input y Select estilo "pill" con sombra suave */
-.mis-compras .filters input,
-.mis-compras .filters select{
-  height:44px;
-  padding:10px 14px;
-  border-radius:14px;
-  border:1px solid #d7deea;           /* borde claro */
-  background:#fff;
-  color:#212529;
-  box-shadow:0 2px 10px rgba(13,110,253,.08);
-  transition:border-color .2s ease, box-shadow .2s ease, background .2s ease;
+body {
+    font-family: var(--font-main); /* Aplica la fuente moderna a toda la web */
+    color: var(--color-dark);
+    background-color: var(--color-gray-bg);
 }
 
-/* Placeholder legible */
-.mis-compras .filters input::placeholder{
-  color:#98a2b3;
+a { text-decoration: none; color: inherit; }
+
+/* =========================================
+   2. NAVBAR (Barra de Navegación)
+   Estilo: Fondo blanco limpio con texto negro
+   ========================================= */
+.navbar {
+    background-color: var(--color-white) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05); /* Sombra suave */
+    padding: 12px 0;
 }
 
-/* Tamaños cómodos como en el diseño "bonito" */
-.mis-compras .filters input[type="search"]{ width:280px; max-width:100%; }
-.mis-compras .filters select{ width:200px; max-width:100%; }
-
-/* Select con flecha personalizada */
-.mis-compras .filters select{
-  -webkit-appearance:none; appearance:none;
-  padding-right:38px;
-  background-image:
-    url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1.41.59L6 5.17 10.59.59 12 2l-6 6-6-6L1.41.59z' fill='%230d6efd'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;
-  background-position:right 12px center;
-  background-size:12px 8px;
+/* Marca / Logo */
+.navbar-brand {
+    font-family: var(--font-main);
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: var(--color-dark) !important;
+    letter-spacing: -0.5px;
 }
 
-/* Focus ring accesible */
-.mis-compras .filters input:focus,
-.mis-compras .filters select:focus{
-  outline:0;
-  border-color:#0d6efd;
-  box-shadow:0 0 0 3px rgba(13,110,253,.15);
+/* Enlaces del menú */
+.navbar-nav .nav-link {
+    font-weight: 500;
+    color: #555 !important;
+    font-size: 0.95rem;
+    margin: 0 8px;
+    position: relative;
+    transition: color 0.3s;
 }
 
-/* Botón con gradiente, relieve y micro-animación */
-.mis-compras .filters button{
-  height:44px;
-  padding:0 18px;
-  border-radius:12px;
-  border:1px solid #0b5ed7;
-  color:#fff;
-  font-weight:600;
-  background:linear-gradient(180deg,#2f76ff,#0d6efd);
-  box-shadow:
-    0 6px 14px rgba(13,110,253,.25),
-    0 1px 0 rgba(255,255,255,.45) inset;
-  transition:transform .04s ease, filter .18s ease, box-shadow .18s ease;
-  cursor:pointer;
-}
-.mis-compras .filters button:hover{
-  filter:brightness(1.03);
-  box-shadow:
-    0 8px 16px rgba(13,110,253,.30),
-    0 1px 0 rgba(255,255,255,.5) inset;
-}
-.mis-compras .filters button:active{
-  transform:translateY(1px);
-  box-shadow:
-    0 4px 10px rgba(13,110,253,.22),
-    0 1px 0 rgba(255,255,255,.4) inset;
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-link.active {
+    color: var(--color-primary) !important; /* Verde al pasar el mouse */
 }
 
-/* Responsive: que no se rompa en móviles */
-@media (max-width:576px){
-  .mis-compras .filters input[type="search"],
-  .mis-compras .filters select,
-  .mis-compras .filters button{ width:100%; }
+/* Botones dentro del Navbar */
+.navbar .btn {
+    border-radius: var(--radius-btn);
+    font-weight: 600;
+    padding: 8px 24px;
+    font-size: 0.9rem;
+}
+
+/* Botón "Registrarse" específico (Gris claro) */
+.navbar .btn-light {
+    background-color: #f8f9fa;
+    color: #333;
+    border: 1px solid #e9ecef;
+}
+.navbar .btn-light:hover {
+    background-color: #e2e6ea;
 }
 
 /* =========================================
-   MIS COMPRAS — Tarjeta de orden (tema claro)
+   3. BOTONES GENERALES
+   Estilo: Redondeados y colores de la marca
+   ========================================= */
+.btn {
+    border-radius: var(--radius-card); /* Ligeramente menos redondos que la nav */
+    font-weight: 600;
+    padding: 10px 20px;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+/* Botón Principal (El verde "Ver" o "Iniciar Sesión") */
+.btn-primary {
+    background-color: var(--color-primary) !important;
+    border-color: var(--color-primary) !important;
+    color: white !important;
+}
+
+.btn-primary:hover {
+    background-color: var(--color-primary-hover) !important;
+    transform: translateY(-1px);
+}
+
+/* Botón Secundario (El blanco con borde "Agregar" o "Registrarse") */
+.btn-outline, .btn-outline-dark, .btn-outline-primary {
+    background-color: transparent !important;
+    border: 1px solid var(--color-dark) !important;
+    color: var(--color-dark) !important;
+}
+
+.btn-outline:hover, .btn-outline-dark:hover {
+    background-color: var(--color-dark) !important;
+    color: white !important;
+}
+
+/* Botones de acción verde claro (tipo WhatsApp) */
+.btn-success {
+    background-color: #25D366 !important; /* Verde WhatsApp específico */
+    color: white;
+}
+
+/* =========================================
+   4. HOME / INICIO
+   Estilo: Banner verde y tarjetas de características
    ========================================= */
 
-/* Soporta varios nombres de contenedor por si tu HTML no usa .card */
-.mis-compras .order-card,
-.mis-compras article.card,
-.mis-compras .order-container,
-.mis-compras .pedido-card {
-  border: 1px solid #dee6f2;
-  border-radius: 18px;
-  background: #fff;
-  box-shadow:
-    0 10px 22px rgba(16,24,40,.08),
-    0 2px 6px rgba(16,24,40,.04);
-  overflow: hidden;             /* redondeo real también en la tabla */
-  margin: 18px 0;
-  padding: 16px 18px;
+/* Hero Banner (Tira verde superior como en la imagen 2) */
+.home .hero {
+    background-color: var(--color-primary);
+    color: white;
+    padding: 60px 0;
+    text-align: center;
+    border-radius: 0;
+    margin-bottom: 40px;
 }
 
-/* Cabecera separada (si existe un wrapper) */
-.mis-compras .order-card .order-head,
-.mis-compras article.card .card-head {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding-bottom: 8px;
-  margin-bottom: 10px;
-  border-bottom: 1px solid #eef2f7;
+.home .hero h1 { font-weight: 800; letter-spacing: -1px; }
+.home .hero .btn-primary { background-color: var(--color-dark) !important; } /* Botón oscuro en fondo verde */
+.home .hero .btn-outline { border-color: white !important; color: white !important; }
+
+/* Tarjetas de características (Visión, Misión, etc.) */
+.home .features {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 60px;
 }
 
-.mis-compras .order-card h2,
-.mis-compras article.card h2{
-  margin:0 0 4px 0;
-  font-size:20px;
-  font-weight:700;
-  color:#0d6efd;
+.home .feature-card {
+    background: white;
+    border: 1px solid var(--color-border);
+    border-top: 5px solid var(--color-primary); /* Borde superior verde */
+    border-radius: 8px;
+    padding: 30px;
+    flex: 1;
+    min-width: 280px;
+    box-shadow: var(--shadow-card);
+    text-align: left; /* Alineado a la izquierda como la referencia */
 }
 
-/* Tabla más limpia dentro de la tarjeta */
-.mis-compras .order-card table,
-.mis-compras article.card table{
-  width:100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  margin-top: 8px;
+.home .feature-card h3 {
+    color: var(--color-dark);
+    font-weight: 700;
+    margin-bottom: 15px;
 }
 
-.mis-compras .order-card thead th,
-.mis-compras article.card thead th{
-  background: linear-gradient(180deg,#f7f9fc,#f0f4fa);
-  color:#344767;
-  font-weight:600;
+/* =========================================
+   5. CATÁLOGO / PRODUCTOS
+   Estilo: Tarjetas blancas limpias con precio verde
+   ========================================= */
+   .catalogo .filters {
+    background-color: #ffffff;
+    padding: 10px 15px;
+    border-radius: 50px; /* Forma de píldora gigante */
+    box-shadow: 0 8px 20px rgba(0,0,0,0.06); /* Sombra flotante */
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    max-width: 800px; 
+    margin: 0 auto 40px auto; /* Centrado */
+    border: 1px solid #f0f0f0;
 }
 
-.mis-compras .order-card th,
-.mis-compras .order-card td,
-.mis-compras article.card th,
-.mis-compras article.card td{
-  padding:10px;
-  border-bottom:1px solid #eef2f7;
-  text-align:left;
+/* Inputs y Selects */
+.catalogo .filters select,
+.catalogo .filters input {
+    border: none;
+    background-color: #f8f9fa;
+    border-radius: 30px;
+    padding: 10px 20px;
+    font-size: 0.95rem;
+    color: #555;
+    outline: none;
+    transition: all 0.2s ease;
+    flex-grow: 1;
 }
 
-.mis-compras .order-card tfoot td,
-.mis-compras article.card tfoot td{ font-weight:700; }
-
-/* Badges de estado (ejemplos) */
-.mis-compras .badge{ padding:6px 10px; border-radius:999px; font-weight:600; }
-.mis-compras .badge-pend{ background:#eef4ff; color:#0d6efd; border:1px solid #d6e4ff; }
-.mis-compras .badge-pago{ background:#eaf7ef; color:#2e7d32; border:1px solid #cfead6; }
-.mis-compras .badge-envi{ background:#e9f4ff; color:#1769aa; border:1px solid #cfe6ff; }
-.mis-compras .badge-entr{ background:#e9f7ea; color:#256c2c; border:1px solid #cfeccf; }
-
-/* Evita "dotted boxes" en links de la lista de pasos; mantiene focus visible accesible */
-.mis-compras ol li a{ text-decoration:none; }
-.mis-compras ol li a:focus{ outline:none; }
-.mis-compras ol li a:focus-visible{
-  outline:none;
-  box-shadow:0 0 0 3px rgba(13,110,253,.25);
-  border-radius:6px;
+.catalogo .filters select:focus,
+.catalogo .filters input:focus {
+    background-color: #fff;
+    box-shadow: inset 0 0 0 2px var(--color-primary);
 }
 
-/* utils */
-.text-center{text-align:center}.mt-2{margin-top:12px}.mt-3{margin-top:18px}
+/* Botón de filtrar */
+.catalogo .filters button {
+    border-radius: 30px;
+    padding: 10px 30px;
+    margin-left: 5px;
+}
 
+.catalogo .filters {
+    background: white;
+    padding: 20px;
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+    margin-bottom: 30px;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+/* Grid de productos */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Tarjetas más angostas */
+    gap: 25px;
+}
+
+/* Tarjeta de Producto Individual */
+.product-card {
+    background: white;
+    border: 1px solid #eee;
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.product-card:hover {
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    transform: translateY(-5px);
+}
+
+.product-media {
+    height: 220px;
+    padding: 20px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.product-media img {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+}
+
+.product-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+/* Precio en verde grande */
+.product-price {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--color-primary);
+    margin-bottom: 5px;
+}
+
+.product-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 5px;
+    line-height: 1.4;
+    height: 2.8em; /* Limitar a 2 líneas aprox */
+    overflow: hidden;
+}
+
+.product-cat {
+    font-size: 0.85rem;
+    color: #999;
+    margin-bottom: 15px;
+}
+
+/* Botones "Ver" y "Agregar" al fondo */
+.price-row {
+    margin-top: auto;
+    display: flex;
+    gap: 10px;
+}
+
+.price-row .btn {
+    flex: 1; /* Que ocupen el 50% cada uno */
+    padding: 8px 0;
+    font-size: 0.9rem;
+    border-radius: 8px; /* Menos redondeado en productos */
+}
+
+/* Botón "Agregar" específico (blanco con borde negro) */
+.price-row .btn-primary {
+    /* El botón "Ver" usa los estilos globales de btn-primary (Verde) */
+}
+
+/* Si tienes un botón secundario ahí, forzamos estilo bordeado */
+.price-row button.btn-muted, 
+.price-row a.btn-outline {
+    background: white !important;
+    border: 1px solid #333 !important;
+    color: #333 !important;
+}
+
+.price-row button.btn-muted:hover {
+    background: #f0f0f0 !important;
+}
+
+/* =========================================
+   6. CARRITO Y TABLAS
+   ========================================= */
+.carrito .cart-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    align-items: flex-start;
+}
+
+/* --- Contenedor de la Tabla --- */
+.carrito .cart-table {
+    flex: 1 1 600px; /* Crece y ocupa espacio, mínimo 600px si cabe */
+    background: white;
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+    padding: 0; /* Quitamos padding para que el header toque los bordes */
+    overflow: hidden; /* Para recortar bordes */
+}
+
+.carrito table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 0;
+}
+
+/* Cabecera de la tabla */
+.carrito thead {
+    background-color: var(--color-dark);
+    color: white;
+}
+
+.carrito th {
+    padding: 18px 20px;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    border: none;
+}
+
+/* Celdas del cuerpo */
+.carrito td {
+    padding: 20px;
+    vertical-align: middle;
+    border-bottom: 1px solid #eee;
+}
+
+/* --- Estilos del Producto (Imagen + Nombre) --- */
+.carrito .prod-cell {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    font-weight: 600;
+    color: var(--color-dark);
+}
+
+/* CORRECCIÓN DE IMAGEN GIGANTE */
+.carrito .thumb {
+    width: 70px;
+    height: 70px;
+    object-fit: cover; /* Recorta la imagen sin deformarla */
+    border-radius: 10px;
+    border: 1px solid #eee;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+/* Botón de Quitar (Rojo sutil) */
+.carrito .btn-danger {
+    background-color: #fff !important;
+    border: 1px solid #dc3545 !important;
+    color: #dc3545 !important;
+    padding: 5px 15px;
+    font-size: 0.85rem;
+    border-radius: 20px;
+}
+.carrito .btn-danger:hover {
+    background-color: #dc3545 !important;
+    color: white !important;
+}
+
+/* --- Panel de Resumen (Sticky a la derecha) --- */
+.carrito .summary {
+    flex: 1 1 300px; /* Ancho base de 300px */
+    background: white;
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+    padding: 30px;
+    position: sticky;
+    top: 100px; /* Se queda fijo al bajar */
+    border: 1px solid #f0f0f0;
+}
+
+.carrito .summary h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid var(--color-primary);
+    color: var(--color-dark);
+    font-weight: 700;
+}
+
+.carrito .sum-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-size: 1rem;
+    color: #666;
+}
+
+.carrito .sum-total {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px dashed #ddd;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--color-primary); /* Total en Verde */
+    align-items: center;
+}
+
+/* Botón de Pago (Verde sólido) */
+.carrito .btn-success {
+    width: 100%;
+    margin-top: 20px;
+    padding: 12px;
+    font-size: 1.1rem;
+    background-color: var(--color-primary) !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(116, 140, 40, 0.3); /* Sombra verde */
+}
+.carrito .btn-success:hover {
+    background-color: var(--color-primary-hover) !important;
+    transform: translateY(-2px);
+}
+
+/* =========================================
+   7. FOOTER
+   Estilo: Fondo negro sólido
+   ========================================= */
+.global-footer {
+    background-color: var(--color-dark); /* Fondo Negro (#1a1a1a) */
+    color: #b0b0b0; /* Texto gris claro para leer bien sobre negro */
+    margin-top: auto; /* Sticky footer */
+    font-size: 0.95rem;
+}
+
+.footer-title {
+    color: #ffffff; /* Títulos en Blanco brillante */
+    font-weight: 700;
+    margin-bottom: 25px;
+    font-size: 1.1rem;
+}
+
+/* Lista de contacto */
+.footer-list li {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 12px; /* Espacio entre icono y texto */
+}
+
+.footer-list a {
+    color: #b0b0b0;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer-list a:hover {
+    color: #ffffff;
+    text-decoration: underline;
+}
+
+/* Iconos */
+.footer-list i {
+    font-size: 1.2rem;
+    /* Los colores de los iconos ya vienen definidos en el HTML con clases de bootstrap (text-primary, etc) */
+}
+
+/* Redes Sociales */
+.social-links {
+    display: flex;
+    gap: 25px;
+}
+
+.social-links a {
+    color: #b0b0b0;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: color 0.3s;
+}
+
+.social-links a:hover {
+    color: #ffffff; /* Se ponen blancos al pasar el mouse */
+}
+
+/* Sección inferior (Copyright) */
+.footer-bottom {
+    border-top: 1px solid #333; /* Línea gris muy sutil separadora */
+    padding: 25px 0;
+    text-align: center;
+    margin-top: 10px;
+    font-size: 0.85rem;
+}
+
+/* =========================================
+   8. UTILIDADES Y EXTRAS
+   ========================================= */
+/* Badges de estado en Mis Compras */
+.badge { padding: 8px 12px; border-radius: 30px; font-weight: 500; }
+.bg-warning { background-color: #ffc107 !important; color: #000; } /* Pendiente */
+.bg-primary { background-color: var(--color-primary) !important; } /* Preparación (ahora verde) */
+.bg-success { background-color: var(--color-dark) !important; } /* Completado (Negro para contraste) */
+.text-success { color: var(--color-primary) !important; } /* Texto verde */
+
+/* Ajustes para login */
+.nav-tabs .nav-link.active {
+    border-color: #dee2e6 #dee2e6 #fff;
+    color: var(--color-primary);
+    font-weight: bold;
+}
+/* =========================================
+   9. MEJORA DE NOTIFICACIONES (Alerts/Toasts)
+   ========================================= */
+.alert {
+    background-color: #ffffff !important; /* Fondo BLANCO SÓLIDO */
+    border: none !important;
+    border-left: 6px solid #333 !important; /* Borde de acento */
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15) !important; /* Sombra fuerte */
+    color: #333 !important;
+    opacity: 1 !important;
+    border-radius: 8px !important;
+    padding: 15px 20px;
+    align-items: center;
+}
+
+/* Éxito (Verde) */
+.alert-success {
+    border-left-color: var(--color-primary) !important;
+}
+.alert-success i {
+    color: var(--color-primary) !important;
+}
+
+/* Error (Rojo) */
+.alert-danger, .alert-error {
+    border-left-color: #dc3545 !important;
+}
+.alert-danger i {
+    color: #dc3545 !important;
+}
+
+/* Warning (Amarillo) */
+.alert-warning {
+    border-left-color: #ffc107 !important;
+}
+
+.alert .btn-close {
+    filter: none !important; /* Elimina el efecto blanco */
+    opacity: 0.6;            /* Lo hace gris suave */
+}
+.alert .btn-close:hover {
+    opacity: 1;              /* Negro total al pasar el mouse */
+}
+
+/* =========================================
+   10. CORRECCIÓN: FOOTER SIEMPRE AL FONDO (Sticky Footer)
+   ========================================= */
+html {
+    height: 100%;
+}
+
+body {
+    min-height: 100vh;      /* El cuerpo debe medir al menos el 100% de la altura de la ventana */
+    display: flex;          /* Activamos el modelo flexible */
+    flex-direction: column; /* Organizamos los elementos en columna (uno abajo del otro) */
+    margin: 0;
+}
+
+.site-main {
+    flex: 1;                /* IMPORTANTE: Esto hace que el contenido principal crezca 
+                               y ocupe todo el espacio sobrante, empujando el footer */
+}
+
+.global-footer {
+    margin-top: auto;       /* Asegura que se mantenga al final */
+    width: 100%;
+}
+
+/* Arreglo para el botón Buscar en Mis Pedidos */
+.mis-compras .filters button {
+    background-color: var(--color-primary) !important;
+    color: white !important;
+    border: none;
+    padding: 8px 25px;
+    border-radius: var(--radius-btn); /* Lo hace redondeado estilo píldora */
+    font-weight: 600;
+    transition: background 0.3s;
+}
+
+.mis-compras .filters button:hover {
+    background-color: var(--color-primary-hover) !important;
+}

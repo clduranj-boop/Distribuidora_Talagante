@@ -1,5 +1,4 @@
 ﻿{% load static %}
-{% include 'core/mensajes.html' %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -8,76 +7,93 @@
   <title>{% block title %}Distribuidora Talagante{% endblock %}</title>
 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-  <link rel="stylesheet" href="{% static 'core/css/style.css' %}?v=15">
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="{% static 'core/css/style.css' %}?v=21">
   {% block extra_head %}{% endblock %}
 </head>
 
-<!-- body con clase 'site' para sticky footer -->
 <body class="site">
-
   {% with current=request.resolver_match.url_name %}
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary site-nav sticky-top shadow-sm">
-    <div class="container-fluid">
+  <nav class="navbar navbar-expand-lg sticky-top">
+    <div class="container">
       <a class="navbar-brand" href="{% url 'home' %}">Distribuidora Talagante</a>
-
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-              aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
       </button>
-
       <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
-
-          <li class="nav-item">
-            <a class="nav-link {% if current == 'home' %}active{% endif %}" href="{% url 'home' %}">Home</a>
-          </li>
-
-          <li class="nav-item">
-            <a class="nav-link {% if current == 'catalogo' %}active{% endif %}" href="{% url 'catalogo' %}">Catálogo</a>
-          </li>
-
-          <li class="nav-item">
-            <a class="nav-link {% if current == 'carrito' or current == 'checkout' %}active{% endif %}"
-               href="{% url 'carrito' %}">Carrito</a>
-          </li>
-
-          <li class="nav-item">
-            <a class="nav-link {% if current == 'mis_compras' %}active{% endif %}"
-               href="{% url 'mis_compras' %}">Mis Compras</a>
-          </li>
-
-          {% if user.is_authenticated %}
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'logout' %}">Cerrar Sesión</a>
-            </li>
-            {% if user.is_staff or user.is_superuser %}
-            <li class="nav-item">
-              <a class="nav-link {% if current == 'admin_home' %}active{% endif %}"
-                 href="{% url 'admin_home' %}">Panel Admin</a>
-            </li>
-            {% endif %}
-          {% else %}
-            <li class="nav-item">
-              <a class="nav-link {% if current == 'login' %}active{% endif %}" href="{% url 'login' %}">Iniciar Sesión</a>
-            </li>
-          {% endif %}
-
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link {% if current == 'home' %}active{% endif %}" href="{% url 'home' %}">Inicio</a></li>
+          <li class="nav-item"><a class="nav-link {% if current == 'catalogo' %}active{% endif %}" href="{% url 'catalogo' %}">Catálogo</a></li>
+          <li class="nav-item"><a class="nav-link {% if current == 'carrito' %}active{% endif %}" href="{% url 'carrito' %}">Carrito</a></li>
+          <li class="nav-item"><a class="nav-link {% if current == 'mis_compras' %}active{% endif %}" href="{% url 'mis_compras' %}">Mis Pedidos</a></li>
         </ul>
+        <div class="d-flex gap-2 align-items-center">
+          {% if user.is_authenticated %}
+            <span class="me-2 fw-semibold d-none d-lg-block">Hola, {{ user.username }}</span>
+            {% if user.is_staff or user.is_superuser %}
+              <a href="{% url 'admin_home' %}" class="btn btn-primary btn-sm px-3">Panel Admin</a>
+            {% endif %}
+            <a href="{% url 'logout' %}" class="btn btn-outline-dark btn-sm px-3">Salir</a>
+          {% else %}
+            <a href="{% url 'login' %}" class="btn btn-primary btn-sm px-4">Iniciar Sesión</a>
+            <a href="{% url 'login' %}?tab=register" class="btn btn-light btn-sm px-4 border">Registrarse</a>
+          {% endif %}
+        </div>
       </div>
     </div>
   </nav>
   {% endwith %}
 
-  <!-- Main flexible para que el footer quede al fondo -->
+  {% include 'core/mensajes.html' %}
+
   <main class="site-main">
     <div class="container mt-4">
       {% block content %}{% endblock %}
     </div>
   </main>
 
-  <!-- Footer global pegado abajo -->
-  <footer class="global-footer bg-dark text-white text-center py-3">
-    <p class="mb-0">&copy; 2025 Distribuidora Talagante. Todos los derechos reservados.</p>
+  <footer class="global-footer">
+    <div class="container">
+      <div class="row pt-5 pb-4">
+        
+        <div class="col-md-6 mb-4 mb-md-0">
+          <h5 class="footer-title">Contacto</h5>
+          <ul class="list-unstyled footer-list">
+            <li>
+              <i class="bi bi-globe-americas text-primary"></i>
+              <a href="#">www.distribuidoratalagante.cl</a>
+            </li>
+            <li>
+              <i class="bi bi-phone-vibrate text-warning"></i>
+              <span>+56 9 9999 9999</span>
+            </li>
+            <li>
+              <i class="bi bi-geo-alt-fill text-danger"></i>
+              <span>Talagante</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="col-md-6">
+          <h5 class="footer-title">Síguenos</h5>
+          <div class="social-links">
+            <a href="#">Facebook</a>
+            <a href="#">Twitter</a>
+            <a href="#">Instagram</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p class="mb-0">&copy; 2025 Distribuidora Talagante. Todos los derechos reservados.</p>
+      </div>
+    </div>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
