@@ -1,0 +1,86 @@
+﻿{% load static %}
+{% include 'core/mensajes.html' %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Distribuidora Talagante{% endblock %}</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="{% static 'core/css/style.css' %}?v=15">
+  {% block extra_head %}{% endblock %}
+</head>
+
+<!-- body con clase 'site' para sticky footer -->
+<body class="site">
+
+  {% with current=request.resolver_match.url_name %}
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary site-nav sticky-top shadow-sm">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="{% url 'home' %}">Distribuidora Talagante</a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+              aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+
+          <li class="nav-item">
+            <a class="nav-link {% if current == 'home' %}active{% endif %}" href="{% url 'home' %}">Home</a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link {% if current == 'catalogo' %}active{% endif %}" href="{% url 'catalogo' %}">Catálogo</a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link {% if current == 'carrito' or current == 'checkout' %}active{% endif %}"
+               href="{% url 'carrito' %}">Carrito</a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link {% if current == 'mis_compras' %}active{% endif %}"
+               href="{% url 'mis_compras' %}">Mis Compras</a>
+          </li>
+
+          {% if user.is_authenticated %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'logout' %}">Cerrar Sesión</a>
+            </li>
+            {% if user.is_staff or user.is_superuser %}
+            <li class="nav-item">
+              <a class="nav-link {% if current == 'admin_home' %}active{% endif %}"
+                 href="{% url 'admin_home' %}">Panel Admin</a>
+            </li>
+            {% endif %}
+          {% else %}
+            <li class="nav-item">
+              <a class="nav-link {% if current == 'login' %}active{% endif %}" href="{% url 'login' %}">Iniciar Sesión</a>
+            </li>
+          {% endif %}
+
+        </ul>
+      </div>
+    </div>
+  </nav>
+  {% endwith %}
+
+  <!-- Main flexible para que el footer quede al fondo -->
+  <main class="site-main">
+    <div class="container mt-4">
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+
+  <!-- Footer global pegado abajo -->
+  <footer class="global-footer bg-dark text-white text-center py-3">
+    <p class="mb-0">&copy; 2025 Distribuidora Talagante. Todos los derechos reservados.</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  {% block extra_script %}{% endblock %}
+</body>
+</html>

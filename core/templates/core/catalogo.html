@@ -1,0 +1,52 @@
+﻿{% extends "core/base.html" %}
+{% load static %}
+{% block title %}Catálogo — Distribuidora{% endblock %}
+
+{% block content %}
+<div class="catalogo">
+  <main class="container">
+
+    <form method="get" class="filters">
+      <select name="categoria">
+        <option value="">Todas las categorías</option>
+        {% for c in categorias %}
+          <option value="{{ c }}" {% if request.GET.categoria == c %}selected{% endif %}>{{ c }}</option>
+        {% endfor %}
+      </select>
+      <input type="number" min="0" step="100" name="precio_max" value="{{ request.GET.precio_max }}" placeholder="Precio máx.">
+      <button class="btn btn-outline" type="submit">Filtrar</button>
+    </form>
+
+    <section class="product-grid">
+      {% if productos %}
+        {% for p in productos %}
+          <article class="product-card">
+            <div class="product-media">
+              {% if p.imagen %}
+                <img src="{{ p.imagen.url }}" alt="{{ p.nombre }}">
+              {% else %}
+                <img src="{% static 'core/img/placeholder.png' %}" alt="{{ p.nombre }}">
+              {% endif %}
+            </div>
+            <div class="product-body">
+              <h3 class="product-title">{{ p.nombre }}</h3>
+              <div class="product-cat">{{ p.categoria }}</div>
+              <div class="price-row">
+                <span class="product-price">${{ p.precio }}</span>
+                {% if p.stock|default:0 > 0 and p.activo %}
+                  <a class="btn btn-primary" href="{% url 'add_to_carrito' p.id %}">Añadir</a>
+                {% else %}
+                  <button class="btn btn-muted" type="button" disabled>Sin stock</button>
+                {% endif %}
+              </div>
+            </div>
+          </article>
+        {% endfor %}
+      {% else %}
+        <p>No hay productos disponibles.</p>
+      {% endif %}
+    </section>
+
+  </main>
+</div>
+{% endblock %}

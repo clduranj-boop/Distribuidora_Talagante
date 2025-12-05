@@ -1,0 +1,296 @@
+﻿/* ===========================
+   Home (claro)
+   =========================== */
+.hero{background:linear-gradient(to right,#f8f9fa,#e9ecef);padding:50px 0;text-align:center}
+.hero h1{font-size:3rem;font-weight:bold;color:#343a40}
+.hero p{font-size:1.25rem;color:#6c757d}
+.carousel-item img{height:500px;object-fit:cover;border-radius:15px}
+.quick-links a{margin:0 15px;font-size:1.1rem}
+
+/* ===========================
+   Variables / base
+   =========================== */
+:root{
+  --bg:#0b0d10;
+  --card:#14181d;
+  --muted:#9aa4b2;
+  --text:#e7eef7;
+  --accent:#0d6efd;
+  --radius:18px;
+  --shadow:0 10px 24px rgba(0,0,0,.12);
+  --nav-h:62px;
+}
+body,input,select,button,table,.btn,.badge{
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans","Liberation Sans","Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji",sans-serif;
+  line-height:1.5;
+}
+.container{max-width:1100px;margin:0 auto;padding:16px}
+
+/* ===========================
+   NAVBAR e-commerce (global)
+   =========================== */
+.navbar.site-nav{
+  min-height:var(--nav-h);
+  padding-top:.25rem; padding-bottom:.25rem;
+  background:linear-gradient(180deg,#0d6efd,#0a58ca)!important;
+  box-shadow:0 6px 18px rgba(13,110,253,.25);
+}
+.navbar.site-nav .navbar-brand{
+  color:#fff!important;font-weight:700;font-size:1.18rem;letter-spacing:.2px;text-decoration:none!important
+}
+.navbar.site-nav .nav-link{
+  color:#eaf1ff!important;font-weight:600;font-size:1.06rem;padding:.6rem .9rem;text-decoration:none!important
+}
+.navbar.site-nav .nav-link:hover{color:#fff!important}
+.navbar.site-nav .nav-link.active{color:#fff!important;position:relative}
+.navbar.site-nav .nav-link.active::after{
+  content:"";position:absolute;left:.6rem;right:.6rem;bottom:.35rem;height:2px;border-radius:2px;background:#fff;opacity:.95
+}
+.navbar.site-nav .navbar-toggler{border-color:rgba(255,255,255,.35)!important}
+.navbar.site-nav .navbar-toggler-icon{filter:brightness(105%)!important}
+
+/* ===========================
+   Botones
+   =========================== */
+.btn{appearance:none;border:1px solid transparent;border-radius:10px;padding:10px 14px;font-weight:600;cursor:pointer;transition:.2s ease}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{filter:brightness(.95)}
+.btn-outline{background:#fff;color:#0b0d10;border-color:#e9ecef}
+.btn-outline:hover{border-color:#cbd3da}
+.btn-danger{background:#dc3545;color:#fff}
+.btn-muted{background:#f1f3f5;color:#212529}
+
+/* ===========================
+   HOME
+   =========================== */
+.home .features{display:grid;grid-template-columns:repeat(12,1fr);gap:18px;margin:28px 0}
+.home .feature-card{grid-column:span 12;background:#fff;border:1px solid #e9ecef;border-radius:16px;padding:20px;box-shadow:0 8px 18px rgba(0,0,0,.06)}
+@media(min-width:768px){.home .feature-card{grid-column:span 4}}
+.home .feature-card h3{margin:0 0 8px 0}
+.home .cta-row{display:flex;justify-content:center;gap:12px;margin:18px 0}
+
+/* ===========================
+   CATÁLOGO
+   =========================== */
+.catalogo{background:#f6f8fb;color:#212529}
+.catalogo .filters{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 8px}
+.catalogo .filters input,.catalogo .filters select{padding:10px 12px;border:1px solid #e9ecef;border-radius:10px;background:#fff}
+.catalogo .product-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:18px;margin:14px 0 26px}
+.catalogo .product-card{grid-column:span 12;background:#fff;border:1px solid #e9ecef;border-radius:16px;overflow:hidden;box-shadow:0 10px 18px rgba(0,0,0,.05);transition:transform .2s,box-shadow .2s;display:flex;flex-direction:column}
+@media(min-width:600px){.catalogo .product-card{grid-column:span 6}}
+@media(min-width:900px){.catalogo .product-card{grid-column:span 4}}
+.catalogo .product-media{position:relative;aspect-ratio:4/3;background:#f1f3f5}
+.catalogo .product-media img{width:100%;height:100%;object-fit:cover;display:block}
+.catalogo .product-body{padding:14px;display:flex;flex-direction:column;gap:8px}
+.catalogo .product-title{font-weight:600;margin:0}
+.catalogo .product-cat{color:#6c757d;font-size:13px}
+.catalogo .price-row{display:flex;align-items:center;justify-content:space-between;margin-top:auto}
+.catalogo .product-price{font-weight:700;font-size:18px}
+.catalogo .product-card:hover{transform:translateY(-4px);box-shadow:0 16px 26px rgba(0,0,0,.08)}
+.catalogo .card,.catalogo .producto,.catalogo .item{border-radius:16px;border:1px solid #e9ecef;background:#fff}
+
+/* ===========================
+   CARRITO
+   =========================== */
+.carrito{background:#f6f8fb;color:#212529}
+.carrito .cart-wrap{display:grid;grid-template-columns:1fr;gap:18px;margin-top:18px}
+@media(min-width:900px){.carrito .cart-wrap{grid-template-columns:2fr 1fr}}
+.carrito .cart-table{background:#fff;border:1px solid #e9ecef;border-radius:16px;box-shadow:0 8px 18px rgba(0,0,0,.06);overflow:hidden}
+.carrito table{width:100%;border-collapse:collapse}
+.carrito th,.carrito td{padding:12px 14px;border-bottom:1px solid #f1f3f5;text-align:left}
+.carrito th{background:#f8f9fa;font-weight:700}
+.carrito .prod-cell{display:flex;align-items:center;gap:12px}
+.carrito .thumb{width:56px;height:56px;object-fit:cover;border-radius:10px;border:1px solid #e9ecef;background:#f8f9fa}
+.carrito .summary{background:#fff;border:1px solid #e9ecef;border-radius:16px;box-shadow:0 8px 18px rgba(0,0,0,.06);padding:18px}
+.carrito .summary h3{margin-top:0}
+.carrito .sum-row{display:flex;justify-content:space-between;margin:6px 0}
+.carrito .sum-total{font-size:20px;font-weight:800}
+
+/* ===========================
+   CHECKOUT
+   =========================== */
+.checkout{background:#f6f8fb;color:#212529}
+.checkout .checkout-grid{display:grid;grid-template-columns:1fr;gap:18px;margin-top:18px}
+@media(min-width:900px){.checkout .checkout-grid{grid-template-columns:2fr 1fr}}
+.checkout .panel{background:#fff;border:1px solid #e9ecef;border-radius:16px;box-shadow:0 8px 18px rgba(0,0,0,.06);padding:18px}
+.checkout .panel h3{margin-top:0}
+
+/* ============================
+   LAYOUT GLOBAL: sticky footer
+   ============================ */
+body.site{min-height:100vh;display:flex;flex-direction:column;}
+.site-main{flex:1;}
+.global-footer{margin-top:auto;} /* empuja el footer al fondo cuando hay poco contenido */
+
+
+/* ================================
+   MIS COMPRAS — filtros mejorados
+   ================================ */
+.mis-compras .filters{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+
+/* Input y Select estilo "pill" con sombra suave */
+.mis-compras .filters input,
+.mis-compras .filters select{
+  height:44px;
+  padding:10px 14px;
+  border-radius:14px;
+  border:1px solid #d7deea;           /* borde claro */
+  background:#fff;
+  color:#212529;
+  box-shadow:0 2px 10px rgba(13,110,253,.08);
+  transition:border-color .2s ease, box-shadow .2s ease, background .2s ease;
+}
+
+/* Placeholder legible */
+.mis-compras .filters input::placeholder{
+  color:#98a2b3;
+}
+
+/* Tamaños cómodos como en el diseño "bonito" */
+.mis-compras .filters input[type="search"]{ width:280px; max-width:100%; }
+.mis-compras .filters select{ width:200px; max-width:100%; }
+
+/* Select con flecha personalizada */
+.mis-compras .filters select{
+  -webkit-appearance:none; appearance:none;
+  padding-right:38px;
+  background-image:
+    url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1.41.59L6 5.17 10.59.59 12 2l-6 6-6-6L1.41.59z' fill='%230d6efd'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 12px center;
+  background-size:12px 8px;
+}
+
+/* Focus ring accesible */
+.mis-compras .filters input:focus,
+.mis-compras .filters select:focus{
+  outline:0;
+  border-color:#0d6efd;
+  box-shadow:0 0 0 3px rgba(13,110,253,.15);
+}
+
+/* Botón con gradiente, relieve y micro-animación */
+.mis-compras .filters button{
+  height:44px;
+  padding:0 18px;
+  border-radius:12px;
+  border:1px solid #0b5ed7;
+  color:#fff;
+  font-weight:600;
+  background:linear-gradient(180deg,#2f76ff,#0d6efd);
+  box-shadow:
+    0 6px 14px rgba(13,110,253,.25),
+    0 1px 0 rgba(255,255,255,.45) inset;
+  transition:transform .04s ease, filter .18s ease, box-shadow .18s ease;
+  cursor:pointer;
+}
+.mis-compras .filters button:hover{
+  filter:brightness(1.03);
+  box-shadow:
+    0 8px 16px rgba(13,110,253,.30),
+    0 1px 0 rgba(255,255,255,.5) inset;
+}
+.mis-compras .filters button:active{
+  transform:translateY(1px);
+  box-shadow:
+    0 4px 10px rgba(13,110,253,.22),
+    0 1px 0 rgba(255,255,255,.4) inset;
+}
+
+/* Responsive: que no se rompa en móviles */
+@media (max-width:576px){
+  .mis-compras .filters input[type="search"],
+  .mis-compras .filters select,
+  .mis-compras .filters button{ width:100%; }
+}
+
+/* =========================================
+   MIS COMPRAS — Tarjeta de orden (tema claro)
+   ========================================= */
+
+/* Soporta varios nombres de contenedor por si tu HTML no usa .card */
+.mis-compras .order-card,
+.mis-compras article.card,
+.mis-compras .order-container,
+.mis-compras .pedido-card {
+  border: 1px solid #dee6f2;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow:
+    0 10px 22px rgba(16,24,40,.08),
+    0 2px 6px rgba(16,24,40,.04);
+  overflow: hidden;             /* redondeo real también en la tabla */
+  margin: 18px 0;
+  padding: 16px 18px;
+}
+
+/* Cabecera separada (si existe un wrapper) */
+.mis-compras .order-card .order-head,
+.mis-compras article.card .card-head {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.mis-compras .order-card h2,
+.mis-compras article.card h2{
+  margin:0 0 4px 0;
+  font-size:20px;
+  font-weight:700;
+  color:#0d6efd;
+}
+
+/* Tabla más limpia dentro de la tarjeta */
+.mis-compras .order-card table,
+.mis-compras article.card table{
+  width:100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 8px;
+}
+
+.mis-compras .order-card thead th,
+.mis-compras article.card thead th{
+  background: linear-gradient(180deg,#f7f9fc,#f0f4fa);
+  color:#344767;
+  font-weight:600;
+}
+
+.mis-compras .order-card th,
+.mis-compras .order-card td,
+.mis-compras article.card th,
+.mis-compras article.card td{
+  padding:10px;
+  border-bottom:1px solid #eef2f7;
+  text-align:left;
+}
+
+.mis-compras .order-card tfoot td,
+.mis-compras article.card tfoot td{ font-weight:700; }
+
+/* Badges de estado (ejemplos) */
+.mis-compras .badge{ padding:6px 10px; border-radius:999px; font-weight:600; }
+.mis-compras .badge-pend{ background:#eef4ff; color:#0d6efd; border:1px solid #d6e4ff; }
+.mis-compras .badge-pago{ background:#eaf7ef; color:#2e7d32; border:1px solid #cfead6; }
+.mis-compras .badge-envi{ background:#e9f4ff; color:#1769aa; border:1px solid #cfe6ff; }
+.mis-compras .badge-entr{ background:#e9f7ea; color:#256c2c; border:1px solid #cfeccf; }
+
+/* Evita "dotted boxes" en links de la lista de pasos; mantiene focus visible accesible */
+.mis-compras ol li a{ text-decoration:none; }
+.mis-compras ol li a:focus{ outline:none; }
+.mis-compras ol li a:focus-visible{
+  outline:none;
+  box-shadow:0 0 0 3px rgba(13,110,253,.25);
+  border-radius:6px;
+}
+
+/* utils */
+.text-center{text-align:center}.mt-2{margin-top:12px}.mt-3{margin-top:18px}

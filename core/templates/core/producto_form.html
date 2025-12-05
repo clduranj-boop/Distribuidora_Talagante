@@ -1,0 +1,145 @@
+﻿{% extends 'core/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}
+    {% if form.instance.pk %}Editar{% else %}Crear{% endif %} Producto — Distribuidora Talagante
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-9">
+
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+                <div class="card-header bg-gradient bg-primary text-white text-center py-5 rounded-top-4">
+                    <h1 class="display-6 mb-0 fw-bold">
+                        {% if form.instance.pk %}Editar Producto{% else %}Crear Nuevo Producto{% endif %}
+                    </h1>
+                </div>
+
+                <div class="card-body p-5">
+
+                    <!-- AQUÍ VA EL BLOQUE CORREGIDO -->
+                    {% if form.is_bound %}
+                        {% if form.cleaned_data.codigo_barras %}
+                            <div class="alert alert-success border-0 text-center py-5 mb-5 rounded-4 shadow">
+                                <h3 class="text-success fw-bold mb-4">
+                                    {% if form.instance.pk %}
+                                        Producto actualizado
+                                    {% else %}
+                                        ¡Producto creado con éxito!
+                                    {% endif %}
+                                </h3>
+                                <div class="fs-4 mb-4">
+                                    <strong>Código de barras:</strong>
+                                </div>
+                                <div class="d-flex justify-content-center align-items-center gap-4">
+                                    <div class="bg-dark text-white fs-2 px-5 py-4 rounded-3 fw-bold shadow">
+                                        {{ form.cleaned_data.codigo_barras }}
+                                    </div>
+                                    <button type="button"
+                                            class="btn btn-success btn-lg px-5 shadow"
+                                            onclick="navigator.clipboard.writeText('{{ form.cleaned_data.codigo_barras|escapejs }}')">
+                                        Copiar código
+                                    </button>
+                                </div>
+                                <p class="mt-4 text-muted fs-5">
+                                    Ya puedes usar este código con la pistola de escáner
+                                </p>
+                            </div>
+                        {% endif %}
+                    {% elif form.instance.pk %}
+                        <div class="alert alert-info border-0 text-center py-4 mb-5 rounded-4 shadow-sm">
+                            <h4 class="mb-3">Código de barras actual</h4>
+                            <div class="d-flex justify-content-center align-items-center gap-4">
+                                <span class="badge bg-dark fs-3 px-5 py-3">
+                                    {{ form.instance.codigo_barras }}
+                                </span>
+                                <button type="button"
+                                        class="btn btn-outline-info btn-lg"
+                                        onclick="navigator.clipboard.writeText('{{ form.instance.codigo_barras|escapejs }}')">
+                                    Copiar código
+                                </button>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <!-- El resto del formulario sigue igual -->
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <div class="row g-4 mb-5">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold fs-5 text-primary">Precio (CLP)</label>
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text bg-primary text-white fw-bold">$</span>
+                                    {{ form.precio }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold fs-5 text-primary">Stock actual</label>
+                                <div class="input-group input-group-lg">
+                                    {{ form.stock }}
+                                    <span class="input-group-text bg-secondary text-white">
+                                        {{ form.instance.get_unidad_medida_display|default:"unid/kg" }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold fs-5">Nombre del producto</label>
+                            {{ form.nombre }}
+                        </div>
+
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-8">
+                                <label class="form-label fw-bold">Categoría</label>
+                                {{ form.categoria }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Unidad de medida</label>
+                                {{ form.unidad_medida }}
+                            </div>
+                        </div>
+
+                        <div class="mb-5 text-center">
+                            <label class="form-label fw-bold fs-5">Imagen del producto</label>
+                            {% if form.instance.imagen %}
+                                <div class="mb-3">
+                                    <img src="{{ form.instance.imagen.url }}" class="img-fluid rounded shadow" style="max-height: 250px;">
+                                </div>
+                            {% endif %}
+                            {{ form.imagen }}
+                        </div>
+
+                        {% for field in form %}
+                            {% if field.name not in 'precio,stock,nombre,categoria,unidad_medida,imagen,codigo_barras' %}
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold">{{ field.label }}</label>
+                                    {{ field }}
+                                    {% if field.help_text %}
+                                        <small class="text-muted d-block mt-1">{{ field.help_text }}</small>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+
+                        <div class="text-end mt-5 pt-4 border-top">
+                            <a href="{% url 'producto_list' %}" class="btn btn-outline-secondary btn-lg px-5 me-3">
+                                Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-success btn-lg px-5 shadow">
+                                {% if form.instance.pk %}Guardar Cambios{% else %}Crear Producto{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+{% endblock %}

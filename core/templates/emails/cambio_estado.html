@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Actualización de tu pedido</title>
+    <style>
+        body { margin:0; padding:0; background:#f4f4f4; font-family: Arial, sans-serif; }
+        .container { max-width: 600px; margin: 30px auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .header { background: #28a745; padding: 40px 20px; text-align: center; color: white; }
+        .header h1 { margin:0; font-size: 28px; }
+        .content { padding: 40px 30px; color: #333; line-height: 1.6; }
+        .estado-anterior { color: #999; text-decoration: line-through; font-size: 18px; }
+        .estado-nuevo { color: #28a745; font-size: 26px; font-weight: bold; margin: 15px 0; }
+        .pedido-info { background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 25px 0; }
+        .footer { background: #333; color: #ccc; padding: 30px; text-align: center; font-size: 14px; }
+        .btn { display: inline-block; background: #28a745; color: white; padding: 14px 30px; text-decoration: none; border-radius: 50px; margin: 20px 0; font-weight: bold; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>¡Tu pedido ha avanzado!</h1>
+    </div>
+
+    <div class="content">
+        <h2 style="color:#28a745;">¡Hola {{ cliente }}!</h2>
+        
+        <p>Te informamos que tu pedido <strong>#{{ pedido_id }}</strong> ha cambiado de estado:</p>
+
+        <div style="text-align:center; margin:40px 0;">
+            <div class="estado-anterior">{{ estado_anterior }}</div>
+            <div style="font-size:50px; color:#28a745;">↓</div>
+            <div class="estado-nuevo">{{ nuevo_estado }}</div>
+        </div>
+
+        <div class="pedido-info">
+            <p><strong>Total pagado:</strong> ${{ total }}</p>
+            <p>Estamos trabajando para que te llegue lo antes posible.</p>
+        </div>
+
+        <div style="text-align:center;">
+            <a href="{{ whatsapp_link }}" class="btn">Contactarnos por WhatsApp</a>
+        </div>
+
+        <p>¡Gracias por confiar en nosotros!</p>
+        <p>Equipo Distribuidora Talagante ❤️</p>
+    </div>
+
+    <div class="footer">
+        © 2025 Distribuidora Talagante • Talagante, Chile<br>
+        <small>Este es un mensaje automático. No respondas a este correo.</small>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,182 @@
+﻿{% extends 'core/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Gestión de Productos — Distribuidora Talagante{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5">
+
+    <!-- Título + contador -->
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h1 class="display-5 fw-bold text-primary mb-1">
+                Gestión de Productos
+            </h1>
+            <p class="text-muted mb-0">Administra todo tu catálogo</p>
+        </div>
+        <div class="text-end">
+            <div class="fs-1 fw-bold text-primary">{{ productos|length }}</div>
+            <div class="text-muted">productos activos</div>
+        </div>
+    </div>
+
+    <!-- Mensajes -->
+    {% if messages %}
+        <div class="alert alert-dismissible fade show" role="alert">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} mb-0">{{ message }}</div>
+            {% endfor %}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endif %}
+
+    <!-- Botones principales -->
+    <div class="d-flex flex-wrap gap-3 mb-5">
+        <!-- Botón normal para crear producto manual -->
+        <a href="{% url 'producto_create' %}" 
+        class="btn btn-primary btn-lg px-5 shadow-lg d-flex align-items-center gap-2">
+            <i class="bi bi-plus-circle-fill fs-4"></i>
+            Crear Nuevo Producto
+        </a>
+
+        <!-- NUEVO BOTÓN GIGANTE PARA ESCÁNER -->
+        <a href="{% url 'escaneo_rapido' %}" 
+        class="btn btn-success btn-lg px-5 shadow-lg d-flex align-items-center gap-3 flex-grow-1 justify-content-center"
+        style="min-width: 280px;">
+            <i class="bi bi-upc-scan fs-1"></i>
+            <div class="text-start">
+                <div class="fw-bold fs-5">Añadir con</div>
+                <div class="fs-4">Escáner</div>
+            </div>
+        </a>
+
+        <!-- Volver al panel -->
+        <a href="{% url 'admin_home' %}" 
+        class="btn btn-outline-secondary btn-lg px-4 d-flex align-items-center gap-2">
+            <i class="bi bi-arrow-left-circle"></i>
+            Volver al Panel
+        </a>
+    </div>
+
+    <!-- Tabla de productos -->
+    <div class="card border-0 shadow-lg">
+        <div class="card-header bg-gradient bg-primary text-white py-4">
+            <h4 class="mb-0 text-center text-uppercase fw-bold">
+                Catálogo Completo
+            </h4>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="text-center">#</th>
+                        <th>Producto</th>
+                        <th class="text-center">Precio</th>
+                        <th>Categoría</th>
+                        <th class="text-center">Stock</th>
+                        <th class="text-center">Estado</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for producto in productos %}
+                    <tr class="{% if producto.bajo_stock %}table-warning{% elif producto.stock == 0 %}table-danger text-white{% endif %}">
+                        <td class="text-center fw-bold">{{ producto.id }}</td>
+                        
+                        <td>
+                            <div class="d-flex align-items-center">
+                                {% if producto.imagen %}
+                                    <img src="{{ producto.imagen.url }}" class="rounded me-3" width="50" height="50" style="object-fit: cover;">
+                                {% else %}
+                                    <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" style="width:50px;height:50px;">
+                                        <i class="bi bi-box text-muted"></i>
+                                    </div>
+                                {% endif %}
+                                <div>
+                                    <div class="fw-bold">{{ producto.nombre }}</div>
+                                    <small class="text-muted">
+                                        Código: <strong>{{ producto.codigo_barras|default:"Sin código" }}</strong>
+                                    </small>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td class="text-center">
+                            {% if producto.precio > 0 %}
+                                <span class="fs-4 fw-bold text-success">
+                                    ${{ producto.precio|floatformat:"0"|intcomma }}
+                                </span>
+                            {% else %}
+                                <span class="text-danger fw-bold">Sin precio</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <span class="badge bg-light text-dark px-3 py-2">
+                                {{ producto.categoria|default:"Sin categoría" }}
+                            </span>
+                        </td>
+
+                        <td class="text-center">
+                            <div class="fs-5 fw-bold">
+                                {{ producto.stock|floatformat:"3" }}
+                            </div>
+                            <small class="text-muted">{{ producto.get_unidad_medida_display }}</small>
+                        </td>
+
+                        <td class="text-center">
+                            {% if producto.stock == 0 %}
+                                <span class="badge bg-danger fs-6 px-4 py-2">Sin stock</span>
+                            {% elif producto.bajo_stock %}
+                                <span class="badge bg-warning text-dark fs-6 px-4 py-2">Bajo stock</span>
+                            {% else %}
+                                <span class="badge bg-success fs-6 px-4 py-2">Disponible</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="text-center">
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'producto_update' producto.id %}" 
+                                   class="btn btn-warning btn-sm" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{% url 'producto_delete' producto.id %}" 
+                                   class="btn btn-danger btn-sm" title="Eliminar"
+                                   onclick="return confirm('¿Eliminar {{ producto.nombre }}?')">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5">
+                            <div class="text-muted">
+                                <i class="bi bi-inbox display-1 mb-3"></i>
+                                <h4>No hay productos registrados</h4>
+                                <p>Comienza creando uno nuevo</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Estilos extra -->
+<style>
+    .table-hover tbody tr:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        transition: all 0.2s;
+    }
+    .card {
+        border-radius: 20px;
+        overflow: hidden;
+    }
+</style>
+{% endblock %}

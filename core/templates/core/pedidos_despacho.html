@@ -1,0 +1,70 @@
+{% extends "core/base.html" %}
+{% load humanize %}
+
+{% block extra_title %} - En Despacho / Listos para Retiro{% endblock %}
+{% block page_title %}Pedidos en Despacho / Listos para Retiro{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-5 text-warning fw-bold">
+            Pedidos en Despacho / Listos para Retiro
+        </h1>
+        <p class="lead text-muted">Total: <strong class="text-dark">{{ ordenes|length }}</strong> pedidos</p>
+    </div>
+
+    <div class="card shadow-lg border-warning">
+        <div class="card-header bg-warning text-dark">
+            <h3 class="mb-0">Listado de Pedidos</h3>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>#ID</th>
+                            <th>Cliente</th>
+                            <th>Total</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for o in ordenes %}
+                        <tr class="table-light">
+                            <td><strong class="text-primary">#{{ o.id }}</strong></td>
+                            <td>
+                                <div class="fw-bold">{{ o.usuario.username }}</div>
+                                <small class="text-muted">{{ o.usuario.perfil.nombre_completo|default:"Sin nombre" }}</small>
+                            </td>
+                            <td class="text-success fw-bold">${{ o.total|intcomma }}</td>
+                            <td>
+                                <span class="badge bg-warning text-dark fs-6">
+                                    {{ o.get_estado_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{% url 'orden_detail' o.id %}" class="btn btn-sm btn-primary">Ver</a>
+                                <a href="{{ o.get_whatsapp_link }}" target="_blank" class="btn btn-sm btn-success">WhatsApp</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <h4>No hay pedidos en despacho o listos para retiro</h4>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="{% url 'gestion_estados' %}" class="btn btn-outline-dark btn-lg">
+            ← Volver a Gestión Activa
+        </a>
+    </div>
+</div>
+{% endblock %}

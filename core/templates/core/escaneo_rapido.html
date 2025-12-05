@@ -1,0 +1,89 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Escaneo Rápido</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: #f0f8ff; padding-top: 15vh; }
+        #codigo-input { font-size: 4rem; text-align: center; height: 120px; }
+        .cantidad-box { font-size: 3rem; }
+        .beep { display: none; }
+    </style>
+</head>
+<body>
+<div class="container text-center">
+    <h1 class="display-3 mb-5">Escanea el código</h1>
+
+    <form method="post" id="form-codigo">
+        {% csrf_token %}
+        <input type="text" id="codigo-input" class="form-control mb-4" autocomplete="off" autofocus>
+    </form>
+
+    <div id="caja-cantidad" class="mt-5" style="display:none;">
+        <h2 id="nombre-tentativo" class="mb-4"></h2>
+        <form method="post" id="form-cantidad">
+            {% csrf_token %}
+            <input type="hidden" name="codigo_barras" id="codigo-hidden">
+            <div class="input-group input-group-lg cantidad-box">
+                <input type="number" name="cantidad" step="any" class="form-control text-center" 
+                       placeholder="Cantidad (kg, cajas, etc.)" required autofocus>
+                <button class="btn btn-success btn-lg px-5">✓ Confirmar</button>
+            </div>
+        </form>
+    </div>
+
+    {% include 'core/mensajes.html' %}
+</div>
+
+<audio class="beep" src="{% static 'beep.mp3' %}" preload="auto"></audio>
+
+<script>
+const inputCodigo = document.getElementById('codigo-input');
+const cajaCantidad = document.getElementById('caja-cantidad');
+const inputCantidad = document.querySelector('#form-cantidad input[name="cantidad"]');
+const codigoHidden = document.getElementById('codigo-hidden');
+
+inputCodigo.focus();
+
+inputCodigo.addEventListener('input', function() {
+    let valor = this.value.trim();
+    
+    // Acepta códigos desde 4 dígitos en adelante (cubre TODOS los casos reales)
+    if (valor.length >= 4 && valor.length <= 30) {
+        // Si el usuario presionó Enter o el escáner mandó Enter automático
+        if (e && e.key === 'Enter') return; // evita doble envío
+        
+        codigoHidden.value = valor;
+        cajaCantidad.style.display = 'block';
+        inputCantidad.focus();
+        inputCantidad.select();
+        this.value = '';  // limpia para el siguiente escaneo
+        document.querySelector('.beep')?.play?.();
+    }
+});
+
+// También acepta Enter manual (por si el escáner no lo manda)
+inputCodigo.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        let valor = this.value.trim();
+        if (valor.length >= 4 && valor.length <= 30) {
+            codigoHidden.value = valor;
+            cajaCantidad.style.display = 'block';
+            inputCantidad.focus();
+            inputCantidad.select();
+            this.value = '';
+        }
+    }
+});
+// Enter en cantidad → envía
+inputCantidad?.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        document.getElementById('form-cantidad').submit();
+    }
+});
+</script>
+</body>
+</html>

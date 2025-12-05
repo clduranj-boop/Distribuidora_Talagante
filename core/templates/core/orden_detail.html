@@ -1,0 +1,165 @@
+{% extends "core/base.html" %}
+{% load humanize %}
+{% load mathfilters %}
+
+{% block title %}Orden #{{ orden.id }} - Distribuidora Talagante{% endblock %}
+
+{% block extrahead %}
+<style>
+    .badge-confirmacion { background-color: #17a2b8 !important; }
+    .badge-preparacion  { background-color: #007bff !important; }
+    .badge-despacho     { background-color: #fd7e14 !important; }
+    .badge-completado   { background-color: #28a745 !important; }
+    .badge-cancelado    { background-color: #dc3545 !important; }
+    .badge-pendiente    { background-color: #ffc107; color: #212529 !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <!-- Título + Estado -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">
+            Orden #{{ orden.id }}
+            <span class="badge fs-5 badge-{{ orden.estado }}">
+                {{ orden.get_estado_display }}
+            </span>
+        </h2>
+        <a href="{% url 'admin_panel' %}" class="btn btn-outline-secondary">
+            Volver al Panel
+        </a>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- Columna Cliente -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <strong>Información del Cliente</strong>
+                </div>
+                <div class="card-body">
+                    <p><strong>Usuario:</strong> {{ orden.usuario.username }}</p>
+                    <p><strong>Nombre completo:</strong> {{ orden.usuario.perfil.nombre_completo }}</p>
+                    <p><strong>Email:</strong> <a href="mailto:{{ orden.usuario.email }}">{{ orden.usuario.email }}</a></p>
+                    <p><strong>Teléfono:</strong> 
+                        {% if orden.usuario.perfil.telefono %}
+                            <a href="tel:+56{{ orden.usuario.perfil.telefono }}">{{ orden.usuario.perfil.telefono }}</a>
+                        {% else %}
+                            <span class="text-muted">No registrado</span>
+                        {% endif %}
+                    </p>
+                    <p><strong>RUT:</strong> {{ orden.usuario.perfil.rut }}</p>
+                    <p><strong>Fecha de la orden:</strong> {{ orden.fecha|date:"d/m/Y H:i" }}</p>
+                </div>
+            </div>
+
+            {% if orden.mensaje_cliente %}
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-info text-white">
+                    <strong>Mensaje del Cliente</strong>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">{{ orden.mensaje_cliente|linebreaks }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Columna Resumen y Acciones -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <strong>Resumen de Pago</strong>
+                </div>
+                <div class="card-body text-center">
+                    <h3 class="text-success mb-3">${{ orden.total|intcomma }}</h3>
+                    <p><strong>Método:</strong> {{ orden.get_metodo_pago_display }}</p>
+                    
+                    {% if orden.comprobante %}
+                        <a href="{{ orden.comprobante.url }}" target="_blank" class="btn btn-success btn-sm mt-2">
+                            Ver Comprobante
+                        </a>
+                    {% else %}
+                        <p class="text-muted mt-2">Aún no ha subido comprobante</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Acciones rápidas -->
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-primary text-white">
+                    <strong>Acciones Rápidas</strong>
+                </div>
+                <div class="list-group list-group-flush">
+                    <!-- BOTÓN CORREGIDO: VA A TU PÁGINA QUE FUNCIONA -->
+                    <a href="{% url 'gestion_estados' %}?q={{ orden.id }}" class="btn btn-warning">
+                        Cambiar Estado
+                    </a>
+                    
+                    <a href="#whatsapp" 
+                       class="list-group-item list-group-item-action text-success">
+                        Enviar por WhatsApp
+                    </a>
+                    
+                    <a href="mailto:{{ orden.usuario.email }}?subject=Tu%20pedido%20#{{ orden.id }}&body=Hola%20{{ orden.usuario.first_name|default:orden.usuario.username }},%0A%0ATu%20orden%20está%20siendo%20procesada..."
+                       class="list-group-item list-group-item-action text-info">
+                        Enviar Correo
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna Productos -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-dark text-white">
+                    <strong>Productos ({{ orden.itemorden_set.count }})</strong>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Producto</th>
+                                    <th class="text-center">Cant.</th>
+                                    <th class="text-end">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in orden.itemorden_set.all %}
+                                <tr>
+                                    <td><strong>{{ item.producto.nombre }}</strong></td>
+                                    <td class="text-center">{{ item.cantidad }}</td>
+                                    <td class="text-end">${{ item.cantidad|mul:item.precio|intcomma }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted py-4">No hay productos</td>
+                                </tr>
+                                {% endfor %}
+                                <tr class="table-success fw-bold">
+                                    <td colspan="2" class="text-end">TOTAL:</td>
+                                    <td class="text-end fs-5">${{ orden.total|intcomma }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- WhatsApp directo -->
+    <div id="whatsapp" class="mt-5 text-center">
+        <hr>
+        <p class="lead mb-3">Enviar resumen automático al cliente por WhatsApp</p>
+        <a href="{{ orden.get_whatsapp_link }}" target="_blank" 
+           class="btn btn-success btn-lg px-5">
+            Abrir WhatsApp con el Pedido
+        </a>
+    </div>
+
+</div>
+{% endblock %}

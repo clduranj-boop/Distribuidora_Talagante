@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Probar Endpoint</title>
+</head>
+<body>
+    <h1>Probar Creación de Orden</h1>
+    <form method="POST" action="{% url 'probar_orden' %}" id="testForm">
+        {% csrf_token %}
+        <button type="submit">Crear Orden de Prueba</button>
+    </form>
+    {% if response %}
+        <h2>Respuesta:</h2>
+        <pre>{{ response|safe }}</pre>
+        {% if response.whatsapp_link %}
+            <p><a href="{{ response.whatsapp_link }}" target="_blank">Abrir WhatsApp</a></p>
+        {% endif %}
+    {% endif %}
+    <script>
+        document.getElementById('testForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            fetch('{% url 'probar_orden' %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ metodo_pago: 'transferencia' }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('testForm').innerHTML += '<div id="result"></div>';
+                document.getElementById('result').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                if (data.whatsapp_link) {
+                    document.getElementById('result').innerHTML += '<p><a href="' + data.whatsapp_link + '" target="_blank">Abrir WhatsApp</a></p>';
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+</html>

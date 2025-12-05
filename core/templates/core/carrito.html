@@ -1,0 +1,62 @@
+﻿{% extends "core/base.html" %}
+{% include 'core/mensajes.html' %}
+{% load static %}
+{% block title %}Carrito — Distribuidora{% endblock %}
+
+
+{% block content %}
+<div class="carrito">
+  <main class="container">
+    {% if mensaje %}
+      <div class="cart-wrap">
+        <div class="cart-table">
+          <table><tbody><tr><td>{{ mensaje }}</td></tr></tbody></table>
+        </div>
+        <aside class="summary">
+          <h3>Resumen</h3>
+          <p>Tu carrito está vacío. Explora el catálogo para agregar productos.</p>
+          <a class="btn btn-primary" href="{% url 'catalogo' %}">Ir al Catálogo</a>
+        </aside>
+      </div>
+    {% else %}
+      <div class="cart-wrap">
+        <div class="cart-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Producto</th><th>Precio</th><th>Cant.</th><th>Subtotal</th><th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for it in items %}
+                <tr>
+                  <td class="prod-cell">
+                    {% if it.producto.imagen %}
+                      <img class="thumb" src="{{ it.producto.imagen.url }}" alt="{{ it.producto.nombre }}">
+                    {% else %}
+                      <img class="thumb" src="{% static 'core/img/placeholder.png' %}" alt="{{ it.producto.nombre }}">
+                    {% endif %}
+                    {{ it.producto.nombre }}
+                  </td>
+                  <td>${{ it.producto.precio }}</td>
+                  <td>{{ it.cantidad }}</td>
+                  <td>${{ it.subtotal }}</td>
+                  <td><a class="btn btn-danger" href="{% url 'remove_from_carrito' it.id %}">Quitar</a></td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <aside class="summary">
+          <h3>Resumen</h3>
+          <div class="sum-row"><span>Subtotal</span><span>${{ total }}</span></div>
+          <div class="sum-row"><span>Envío</span><span>—</span></div>
+          <div class="sum-row sum-total"><span>Total</span><span>${{ total }}</span></div>
+          <a href="{% url 'checkout' %}" class="btn btn-success">Proceder al Pago</a> 
+        </aside>
+      </div>
+    {% endif %}
+  </main>
+</div>
+{% endblock %}

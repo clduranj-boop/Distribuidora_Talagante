@@ -1,0 +1,33 @@
+﻿{% extends "core/base.html" %}
+{% load static %}
+{% block title %}Inicio — Distribuidora Talagante{% endblock %}
+
+{% block content %}
+<div class="home">
+  <section class="hero">
+    <div class="container">
+      <h1>Bienvenido a Distribuidora Talagante</h1>
+      <p>Encuentra productos a precios increíbles con despacho rápido.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="{% url 'catalogo' %}">Ver Catálogo</a>
+        <a class="btn btn-outline" href="{% url 'mis_compras' %}">Mis Compras</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="container features">
+    <article class="feature-card">
+      <h3>Despacho a tiempo</h3>
+      <p>Seguimiento de tus pedidos con estados en tiempo real.</p>
+    </article>
+    <article class="feature-card">
+      <h3>Pagos seguros</h3>
+      <p>Transferencia bancaria y confirmación manual del pago.</p>
+    </article>
+    <article class="feature-card">
+      <h3>Precios convenientes</h3>
+      <p>Ofertas destacadas y stock actualizado.</p>
+    </article>
+  </section>
+</div>
+{% endblock %}

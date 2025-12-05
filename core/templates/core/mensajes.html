@@ -1,0 +1,47 @@
+{% if messages %}
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 9999; pointer-events: none;">
+    <div class="d-flex flex-column gap-3 align-items-end">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }} 
+                    alert-dismissible fade show 
+                    shadow-lg border-0 rounded-4 
+                    px-4 py-3 
+                    d-flex align-items-center 
+                    animate__animated animate__slideInRight 
+                    animate__faster"
+             role="alert"
+             style="min-width: 320px; max-width: 450px; pointer-events: all;">
+            
+            <!-- Ícono bonito según tipo -->
+            {% if message.tags == 'success' %}
+                <i class="bi bi-check-circle-fill text-success fs-3 me-3"></i>
+            {% elif message.tags == 'warning' %}
+                <i class="bi bi-exclamation-triangle-fill text-warning fs-3 me-3"></i>
+            {% elif message.tags == 'error' %}
+                <i class="bi bi-x-circle-fill text-danger fs-3 me-3"></i>
+            {% else %}
+                <i class="bi bi-info-circle-fill text-info fs-3 me-3"></i>
+            {% endif %}
+
+            <!-- Mensaje con HTML permitido -->
+            <div class="me-auto">
+                {{ message|safe }}
+            </div>
+
+            <!-- Botón cerrar -->
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Auto-desaparecer después de 4 segundos -->
+<script>
+setTimeout(function() {
+    document.querySelectorAll('.alert-dismissible').forEach(function(alert) {
+        let bsAlert = new bootstrap.Alert(alert);
+        bsAlert.close();
+    });
+}, 4000);
+</script>
+{% endif %}
