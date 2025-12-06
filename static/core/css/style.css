@@ -973,3 +973,124 @@ body {
     padding-left: 30px !important; /* Espacio para que el número no toque el $ */
     border-radius: 8px !important; /* Aseguramos que sea redondo */
 }
+
+/* =========================================
+   17. DISEÑO RESPONSIVO (MÓVIL)
+   ========================================= */
+
+@media (max-width: 768px) {
+    
+    /* 1. Ajustes Generales */
+    .container {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+    
+    h1 { font-size: 1.8rem !important; }
+    h2 { font-size: 1.5rem !important; }
+    h3 { font-size: 1.3rem !important; }
+
+    /* 2. Navbar (Menú) */
+    .navbar-brand {
+        font-size: 1.2rem;
+    }
+    
+    /* 3. Home: Carrusel y Tarjetas */
+    #heroCarousel, .carousel-inner, .carousel-item, .carousel-image-container {
+        height: 250px !important; /* Altura más pequeña para celular */
+    }
+    
+    .home-container .row.g-4 > div {
+        width: 100%; /* Tarjetas ocupan todo el ancho */
+    }
+
+    /* 4. Catálogo: Grid de Productos */
+    .product-grid {
+        grid-template-columns: 1fr 1fr; /* 2 columnas en móviles */
+        gap: 15px;
+    }
+    
+    /* En pantallas MUY pequeñas (iphone SE), 1 sola columna */
+    @media (max-width: 400px) {
+        .product-grid { grid-template-columns: 1fr; }
+    }
+
+    .product-media { height: 160px; } /* Imagen más chica */
+    .product-price { font-size: 1.2rem; }
+
+    /* 5. Carrito: Tabla Responsiva */
+    .carrito .cart-table table, 
+    .carrito .cart-table thead, 
+    .carrito .cart-table tbody, 
+    .carrito .cart-table th, 
+    .carrito .cart-table td, 
+    .carrito .cart-table tr { 
+        display: block; /* Rompe la tabla para apilarla */
+    }
+    
+    .carrito .cart-table thead tr { 
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+    
+    .carrito .cart-table tr { 
+        border: 1px solid #eee;
+        margin-bottom: 15px;
+        border-radius: 12px;
+        padding: 10px;
+        background: #fff;
+    }
+    
+    .carrito .cart-table td { 
+        border: none;
+        position: relative;
+        padding-left: 50%; 
+        text-align: right; /* Alinea contenido a la derecha */
+        padding: 8px 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    /* Agrega etiquetas visuales */
+    .carrito .cart-table td:nth-of-type(1):before { content: "Producto"; font-weight: bold; }
+    .carrito .cart-table td:nth-of-type(2):before { content: "Precio"; font-weight: bold; }
+    .carrito .cart-table td:nth-of-type(3):before { content: "Cant."; font-weight: bold; }
+    .carrito .cart-table td:nth-of-type(4):before { content: "Subtotal"; font-weight: bold; }
+
+    .carrito .prod-cell {
+        flex-direction: row;
+        text-align: left;
+    }
+
+    /* 6. Checkout: Columnas apiladas */
+    .checkout-page .row {
+        flex-direction: column-reverse; /* Pone el botón de pago arriba del resumen en móvil */
+    }
+    
+    .payment-options-grid {
+        grid-template-columns: 1fr; /* Una opción debajo de otra */
+    }
+
+    /* 7. Panel Admin */
+    .card-dashboard { margin-bottom: 15px; }
+    
+    /* Tabla Admin con Scroll horizontal */
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Ocultar columnas menos importantes en móvil */
+    .table td:nth-child(3), .table th:nth-child(3) { display: none; } /* Oculta Fecha */
+    
+    /* 8. Mis Pedidos */
+    .order-card-hover .card-header {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 10px;
+    }
+    
+    .icon-box-small { display: none; } /* Ahorra espacio */
+}
