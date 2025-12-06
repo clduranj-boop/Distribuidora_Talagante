@@ -14,9 +14,11 @@
       <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
     </div>
     
-    <div class="carousel-inner" style="background-color: #f8f9fa;"> <div class="carousel-item active" data-bs-interval="5000">
+    <div class="carousel-inner" style="background-color: #f8f9fa;">
+      
+      <div class="carousel-item active" data-bs-interval="5000">
         <div class="d-flex align-items-center justify-content-center bg-white" style="height: 400px;">
-            <img src="{% static 'core/img/Modo_navidad.png' %}" 
+            <img src="{% static 'core/img/Feliz_navidad_logo.jpg' %}" 
                  class="h-100 w-auto" 
                  alt="Feliz Navidad" 
                  style="max-width: 100%; object-fit: contain;">
@@ -29,7 +31,7 @@
 
       <div class="carousel-item" data-bs-interval="5000">
         <div class="d-flex align-items-center justify-content-center bg-white" style="height: 400px;">
-            <img src="{% static 'core/img/Feliz_navidad_logo.png' %}" 
+            <img src="{% static 'core/img/Modo_navidad.jpg' %}" 
                  class="h-100 w-auto" 
                  alt="Modo Navidad Activado" 
                  style="max-width: 100%; object-fit: contain;">
@@ -79,15 +81,13 @@
               </h6>
               <small class="text-muted mb-3">{{ p.categoria|default:"General" }}</small>
 
-              <div class="mt-auto d-flex gap-2">
-                <a href="#" class="btn btn-primary flex-grow-1 fw-bold py-2" style="font-size: 0.9rem;">Ver</a>
-                
+              <div class="mt-auto">
                 {% if p.stock > 0 %}
-                  <a href="{% url 'add_to_carrito' p.id %}" class="btn btn-outline-dark flex-grow-1 fw-bold py-2" style="font-size: 0.9rem;">
+                  <a href="{% url 'add_to_carrito' p.id %}" class="btn btn-outline-dark w-100 fw-bold py-2" style="font-size: 0.9rem;">
                     Agregar
                   </a>
                 {% else %}
-                  <button class="btn btn-outline-secondary flex-grow-1 py-2" disabled style="font-size: 0.9rem;">
+                  <button class="btn btn-outline-secondary w-100 py-2" disabled style="font-size: 0.9rem;">
                     Agotado
                   </button>
                 {% endif %}
@@ -137,8 +137,8 @@
 </div>
 
 <style>
-  /* Efecto Hover para tarjetas */
   .hover-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
   .hover-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important; }
+  .object-fit-cover { object-fit: cover; object-position: center; }
 </style>
 {% endblock %}
