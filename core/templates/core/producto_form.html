@@ -25,9 +25,24 @@
                     <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
                         {% csrf_token %}
 
+                        {% if form.errors %}
+                            <div class="alert alert-danger rounded-3 mb-4 border-0 shadow-sm">
+                                <h6 class="fw-bold mb-2"><i class="bi bi-exclamation-circle-fill me-2"></i>Error al guardar:</h6>
+                                <ul class="mb-0 small ps-3">
+                                {% for field in form %}
+                                    {% for error in field.errors %}
+                                        <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                                    {% endfor %}
+                                {% endfor %}
+                                {% for error in form.non_field_errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+
                         <h6 class="text-uppercase text-muted fw-bold mb-3 small ls-1">Información Básica</h6>
                         <div class="row g-4 mb-4">
-                            
                             <div class="col-md-4">
                                 <label class="form-label fw-bold small">Precio (CLP) <span class="text-danger">*</span></label>
                                 <div class="price-input-wrapper">
@@ -35,7 +50,6 @@
                                     {{ form.precio }}
                                 </div>
                             </div>
-
                             <div class="col-md-4">
                                 <label class="form-label fw-bold small">Stock Actual <span class="text-danger">*</span></label>
                                 {{ form.stock }}
@@ -55,6 +69,12 @@
                             <label class="form-label fw-bold small">Categoría</label>
                             {{ form.categoria }}
                             <div class="form-text">Ej: Lácteos, Abarrotes, Bebidas...</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold small">Tamaño del paquete <span class="text-danger">*</span></label>
+                            {{ form.tamano_paquete }} 
+                            <div class="form-text">Ej: 12 unid por caja, 1 kg, etc.</div>
                         </div>
 
                         <h6 class="text-uppercase text-muted fw-bold mb-3 mt-5 small ls-1">Multimedia</h6>
