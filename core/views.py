@@ -41,6 +41,7 @@ from .forms import EscaneoEntradaForm, ProductoRapidoForm
 from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
 
+
 #Validación de contraseña y registro
 from .validators import validar_contraseña_fuerte  
 import re
@@ -56,7 +57,15 @@ def is_superuser(user):
 
 # Vistas existentes de tu proyecto
 def home(request):
-    return render(request, 'core/home.html', {'mensaje': 'Bienvenido a Distribuidora Talagante'})
+    # Obtener 4 productos aleatorios para mostrar en el home
+    # El '?' ordena aleatoriamente (random)
+    productos_destacados = Producto.objects.filter(activo=True).order_by('?')[:4]
+    
+    context = {
+        'mensaje': 'Bienvenido a Distribuidora Talagante',
+        'productos': productos_destacados
+    }
+    return render(request, 'core/home.html', context)
 
 @ensure_csrf_cookie
 def login_view(request):
@@ -415,18 +424,35 @@ def orden_exitosa(request, orden_id):
 
 @login_required
 def mis_compras(request):
+    # 1. Obtener todas las órdenes
     ordenes = Orden.objects.filter(usuario=request.user).order_by('-fecha')
+
+    # 2. CAPTURAR DATOS DEL BUSCADOR (Esto es lo que faltaba)
+    busqueda = request.GET.get('q')      
+    estado_filtro = request.GET.get('estado')
+
+    # 3. FILTRAR POR NÚMERO (#6 o 6)
+    if busqueda:
+        busqueda = busqueda.strip()
+        if busqueda.isdigit():
+            ordenes = ordenes.filter(id=busqueda)
+        elif busqueda.startswith('#') and busqueda[1:].isdigit():
+            ordenes = ordenes.filter(id=busqueda[1:])
     
-    # Calcular subtotales temporalmente SIN usar property
+    # 4. FILTRAR POR ESTADO
+    if estado_filtro:
+        ordenes = ordenes.filter(estado=estado_filtro)
+
+    # 5. Calcular subtotales
     for orden in ordenes:
         for item in orden.itemorden_set.all():
             item.subtotal_temp = item.cantidad * item.precio
 
     context = {
         'ordenes': ordenes,
+        'ESTADOS': Orden.ESTADOS, # Vital para el filtro
     }
     return render(request, 'core/mis_compras.html', context)
-
 
 def logout_view(request):
     logout(request)
@@ -536,6 +562,67 @@ def add_to_carrito(request, producto_id):
     )
 
     return redirect('catalogo')
+
+from django.shortcuts import render, redirect
+from .models import ItemOrden, Producto # Asegúrate de tener estas importaciones
+
+# ---------------------------------------------------
+# SUMAR (VERSIÓN SEGURA)
+# ---------------------------------------------------
+def sumar_producto(request, item_id):
+    print(f"--- INTENTO SUMAR ITEM {item_id} ---")
+
+    # Usamos filter().first() en lugar de get_object_or_404
+    # Si no existe, devuelve None (vacío) en vez de error 404
+    item = ItemOrden.objects.filter(id=item_id).first()
+    
+    if item:
+        # Solo sumamos si existe y hay stock
+        if item.producto.stock > item.cantidad:
+            item.cantidad += 1
+            item.save()
+            print(f"--- NUEVA CANTIDAD: {item.cantidad} ---")
+        else:
+            print("--- NO HAY MÁS STOCK ---")
+    else:
+        print("--- ITEM NO ENCONTRADO (Tal vez ya se borró) ---")
+    
+    return redirect('carrito')
+
+# ---------------------------------------------------
+# RESTAR (VERSIÓN SEGURA)
+# ---------------------------------------------------
+def restar_producto(request, item_id):
+    print(f"--- INTENTO RESTAR ITEM {item_id} ---")
+    
+    item = ItemOrden.objects.filter(id=item_id).first()
+    
+    if item:
+        if item.cantidad > 1:
+            item.cantidad -= 1
+            item.save()
+            print(f"--- RESTADO. NUEVA CANTIDAD: {item.cantidad} ---")
+        else:
+            item.delete()
+            print("--- ELIMINADO POR LLEGAR A 0 ---")
+    else:
+        print("--- ITEM NO ENCONTRADO ---")
+            
+    return redirect('carrito')
+
+# ---------------------------------------------------
+# ELIMINAR (VERSIÓN SEGURA)
+# ---------------------------------------------------
+def remove_from_carrito(request, item_id):
+    print(f"--- ELIMINANDO ITEM {item_id} ---")
+    
+    item = ItemOrden.objects.filter(id=item_id).first()
+    
+    if item:
+        item.delete()
+        print("--- ELIMINADO ---")
+        
+    return redirect('carrito')
 
 @login_required
 def remove_from_carrito(request, item_id):
@@ -768,10 +855,12 @@ def gestion_estados(request):
     busqueda = request.GET.get('q', '').strip()
     estado_filtro = request.GET.get('estado', '')
 
+    # 1. Obtener todas las órdenes ordenadas
     ordenes = Orden.objects.select_related('usuario', 'usuario__perfil') \
                            .prefetch_related('itemorden_set__producto') \
                            .order_by('-fecha')
 
+    # 2. Aplicar Filtros (Búsqueda y Estado)
     if busqueda:
         ordenes = ordenes.filter(
             Q(id__icontains=busqueda) |
@@ -783,6 +872,7 @@ def gestion_estados(request):
     if estado_filtro:
         ordenes = ordenes.filter(estado=estado_filtro)
 
+    # 3. Lógica POST (Cambio de estado rápido)
     if request.method == 'POST':
         orden_id = request.POST.get('orden_id')
         nuevo_estado = request.POST.get('estado')
@@ -793,11 +883,10 @@ def gestion_estados(request):
             orden.estado = nuevo_estado
             orden.save()
 
-            # GENERAR LINK DE WHATSAPP
+            # Mensaje de WhatsApp y Correo (Tu lógica original)
             mensaje_wa = f"Hola! Mi pedido es el #{orden.id} - Estado: {orden.get_estado_display()}"
             whatsapp_link = f"https://wa.me/56949071013?text={urllib.parse.quote(mensaje_wa)}"
 
-            # CORREO LINDO AL CLIENTE
             if orden.usuario.email:
                 try:
                     html_email = render_to_string('emails/cambio_estado.html', {
@@ -817,7 +906,6 @@ def gestion_estados(request):
                     )
                     email.attach_alternative(html_email, "text/html")
                     email.send()
-                    print(f"CORREO ENVIADO A {orden.usuario.email}")
                 except Exception as e:
                     print(f"ERROR CORREO: {e}")
 
@@ -827,8 +915,14 @@ def gestion_estados(request):
             print(f"ERROR GENERAL: {e}")
             return JsonResponse({'success': False})
 
+    # --- 4. PAGINACIÓN (AQUÍ ESTÁ EL CAMBIO) ---
+    # Esto divide la lista 'ordenes' en páginas de 20 elementos
+    paginator = Paginator(ordenes, 20) 
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     context = {
-        'ordenes': ordenes,
+        'ordenes': page_obj,  # Pasamos el objeto paginado, no la lista completa
         'busqueda': busqueda,
         'estado_filtro': estado_filtro,
         'estados_choices': Orden.ESTADOS,
@@ -878,19 +972,6 @@ def update_orden_status(request, orden_id):
     context = {'orden': orden}
     return render(request, 'core/update_orden_status.html', context)
 
-@login_required
-def mis_compras(request):
-    ordenes = Orden.objects.filter(usuario=request.user).order_by('-fecha')
-    
-    # Calcular subtotales temporalmente
-    for orden in ordenes:
-        for item in orden.itemorden_set.all():
-            item.subtotal_temp = item.cantidad * item.precio
-
-    context = {
-        'ordenes': ordenes,
-    }
-    return render(request, 'core/mis_compras.html', context)
 
 #Verificación correo electronico seguro
 def enviar_codigo_verificacion(user):

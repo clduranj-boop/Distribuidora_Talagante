@@ -1,33 +1,144 @@
 ﻿{% extends "core/base.html" %}
 {% load static %}
+{% load humanize %}
+
 {% block title %}Inicio — Distribuidora Talagante{% endblock %}
 
 {% block content %}
-<div class="home">
-  <section class="hero">
-    <div class="container">
-      <h1>Bienvenido a Distribuidora Talagante</h1>
-      <p>Encuentra productos a precios increíbles con despacho rápido.</p>
-      <div class="cta-row">
-        <a class="btn btn-primary" href="{% url 'catalogo' %}">Ver Catálogo</a>
-        <a class="btn btn-outline" href="{% url 'mis_compras' %}">Mis Compras</a>
+<div class="home-container animate-fade-in">
+
+  <div id="heroCarousel" class="carousel slide shadow-lg rounded-4 overflow-hidden mb-5" data-bs-ride="carousel">
+    
+    <div class="carousel-indicators">
+      <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
+      <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
+    </div>
+    
+    <div class="carousel-inner" style="background-color: #f8f9fa;"> <div class="carousel-item active" data-bs-interval="5000">
+        <div class="d-flex align-items-center justify-content-center bg-white" style="height: 400px;">
+            <img src="{% static 'core/img/Modo_navidad.png' %}" 
+                 class="h-100 w-auto" 
+                 alt="Feliz Navidad" 
+                 style="max-width: 100%; object-fit: contain;">
+        </div>
+        <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded-3 px-4">
+          <h2 class="fw-bold">¡Modo Navidad Activado! 🎄</h2>
+          <p>Encuentra todo para tu cena navideña con nosotros.</p>
+        </div>
+      </div>
+
+      <div class="carousel-item" data-bs-interval="5000">
+        <div class="d-flex align-items-center justify-content-center bg-white" style="height: 400px;">
+            <img src="{% static 'core/img/Feliz_navidad_logo.png' %}" 
+                 class="h-100 w-auto" 
+                 alt="Modo Navidad Activado" 
+                 style="max-width: 100%; object-fit: contain;">
+        </div>
+      </div>
+
+    </div>
+
+    <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon bg-dark rounded-circle p-3 bg-opacity-50" aria-hidden="true"></span>
+      <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+      <span class="carousel-control-next-icon bg-dark rounded-circle p-3 bg-opacity-50" aria-hidden="true"></span>
+      <span class="visually-hidden">Next</span>
+    </button>
+  </div>
+
+  <section class="py-4">
+    <div class="text-center mb-5">
+      <h2 class="fw-bold" style="color: #1a1a1a;">Mira estos productos destacados</h2>
+      <p class="text-muted">Selección especial para tu canasta básica</p>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+      {% for p in productos %}
+        <div class="col-sm-6 col-md-4 col-lg-3">
+          <article class="card h-100 border border-light-subtle shadow-sm hover-card rounded-3 overflow-hidden">
+            
+            <div class="position-relative bg-white border-bottom p-3 d-flex align-items-center justify-content-center" style="height: 200px;">
+              {% if p.imagen %}
+                <img src="{{ p.imagen.url }}" alt="{{ p.nombre }}" class="img-fluid" style="max-height: 100%; object-fit: contain;">
+              {% else %}
+                <div class="text-muted text-center">
+                  <i class="bi bi-image fs-1"></i>
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="card-body d-flex flex-column p-3">
+              <h4 class="fw-bold mb-1" style="color: var(--color-primary);">
+                ${{ p.precio|floatformat:0|intcomma }}
+              </h4>
+              
+              <h6 class="card-title fw-bold text-dark mb-1 text-truncate" title="{{ p.nombre }}">
+                {{ p.nombre }}
+              </h6>
+              <small class="text-muted mb-3">{{ p.categoria|default:"General" }}</small>
+
+              <div class="mt-auto d-flex gap-2">
+                <a href="#" class="btn btn-primary flex-grow-1 fw-bold py-2" style="font-size: 0.9rem;">Ver</a>
+                
+                {% if p.stock > 0 %}
+                  <a href="{% url 'add_to_carrito' p.id %}" class="btn btn-outline-dark flex-grow-1 fw-bold py-2" style="font-size: 0.9rem;">
+                    Agregar
+                  </a>
+                {% else %}
+                  <button class="btn btn-outline-secondary flex-grow-1 py-2" disabled style="font-size: 0.9rem;">
+                    Agotado
+                  </button>
+                {% endif %}
+              </div>
+            </div>
+
+          </article>
+        </div>
+      {% empty %}
+        <p class="text-center text-muted">No hay productos destacados por el momento.</p>
+      {% endfor %}
+    </div>
+
+    <div class="text-center mt-5">
+      <a href="{% url 'catalogo' %}" class="btn btn-outline-dark rounded-pill px-5 py-2 fw-bold shadow-sm">
+        Ver Catálogo Completo
+      </a>
+    </div>
+  </section>
+
+  <section class="container features mt-5 pt-5 border-top">
+    <div class="row text-center g-4">
+      <div class="col-md-4">
+        <div class="p-4 rounded-4 bg-light h-100">
+          <i class="bi bi-truck fs-1 text-warning mb-3"></i>
+          <h5 class="fw-bold">Despacho a tiempo</h5>
+          <p class="text-muted small mb-0">Seguimiento en tiempo real de tu pedido.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="p-4 rounded-4 bg-light h-100">
+          <i class="bi bi-shield-check fs-1 text-success mb-3"></i>
+          <h5 class="fw-bold">Pagos seguros</h5>
+          <p class="text-muted small mb-0">Transferencia bancaria y pago en efectivo.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="p-4 rounded-4 bg-light h-100">
+          <i class="bi bi-tags fs-1 text-primary mb-3"></i>
+          <h5 class="fw-bold">Precios convenientes</h5>
+          <p class="text-muted small mb-0">Ofertas destacadas y stock actualizado.</p>
+        </div>
       </div>
     </div>
   </section>
 
-  <section class="container features">
-    <article class="feature-card">
-      <h3>Despacho a tiempo</h3>
-      <p>Seguimiento de tus pedidos con estados en tiempo real.</p>
-    </article>
-    <article class="feature-card">
-      <h3>Pagos seguros</h3>
-      <p>Transferencia bancaria y confirmación manual del pago.</p>
-    </article>
-    <article class="feature-card">
-      <h3>Precios convenientes</h3>
-      <p>Ofertas destacadas y stock actualizado.</p>
-    </article>
-  </section>
 </div>
+
+<style>
+  /* Efecto Hover para tarjetas */
+  .hover-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+  .hover-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important; }
+</style>
 {% endblock %}

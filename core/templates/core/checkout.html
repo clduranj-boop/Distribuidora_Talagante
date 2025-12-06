@@ -2,153 +2,176 @@
 {% load static %}
 {% load mathfilters %}
 
-{% block title %}Finalizar Compra - Distribuidora Talagante{% endblock %}
+{% block title %}Finalizar Compra{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-10">
-            <h1 class="text-center mb-5 text-primary fw-bold">
-                <i class="bi bi-cart-check"></i> Finalizar Compra
+<div class="checkout-page animate-fade-in">
+    <div class="container py-5">
+        
+        <div class="text-center mb-5">
+            <h1 class="display-5 fw-bold mb-2" style="color: #1a1a1a;">
+                <i class="bi bi-cart-check-fill me-3" style="color: var(--color-primary);"></i>Finalizar Compra
             </h1>
+            <p class="lead text-muted">Revisa tu pedido y selecciona cómo pagar.</p>
+        </div>
 
-            <div class="row g-5">
-                <!-- RESUMEN DEL PEDIDO -->
-                <div class="col-lg-7">
-                    <div class="card border-0 shadow-lg rounded-4">
-                        <div class="card-header bg-primary text-white rounded-top-4">
-                            <h4 class="mb-0"><i class="bi bi-basket3"></i> Tu Pedido</h4>
-                        </div>
-                        <div class="card-body p-4">
-                            <table class="table table-hover align-middle">
-                                <tbody>
-                                    {% for item in items %}
-                                    <tr class="border-bottom">
-                                        <td class="text-start">
-                                            <strong>{{ item.producto.nombre }}</strong>
-                                            <br><small class="text-muted">{{ item.cantidad }} unidad{{ item.cantidad|pluralize }}</small>
-                                        </td>
-                                        <td class="text-end">
-                                            <span class="text-muted">${{ item.producto.precio|floatformat:0 }}</span>
-                                        </td>
-                                        <td class="text-end fw-bold text-primary">
-                                            ${{ item.cantidad|mul:item.producto.precio|floatformat:0 }}
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                                <tfoot>
-                                    <tr class="table-success">
-                                        <th colspan="2" class="text-end fs-4">TOTAL A PAGAR:</th>
-                                        <th class="text-end fs-3 text-success fw-bold">
-                                            ${{ total|floatformat:0 }}
-                                        </th>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </div>
+        <div class="row g-5">
+            
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                    <div class="card-header bg-dark text-white py-3">
+                        <h4 class="mb-0 fw-bold fs-5">
+                            <i class="bi bi-bag-fill me-2 opacity-50"></i>Tu Pedido
+                        </h4>
                     </div>
-                </div>
-
-                <!-- FORMULARIO DE PAGO -->
-                <div class="col-lg-5">
-                    <div class="card border-0 shadow-lg rounded-4 sticky-top" style="top: 20px;">
-                        <div class="card-header bg-dark text-white rounded-top-4">
-                            <h4 class="mb-0"><i class="bi bi-credit-card"></i> Método de Pago</h4>
+                    
+                    <div class="card-body p-0">
+                        <div class="products-scroll px-4 py-3 bg-white">
+                            {% for item in items %}
+                            <div class="d-flex align-items-center mb-3 pb-3 border-bottom border-light">
+                                <div class="flex-shrink-0">
+                                    {% if item.producto.imagen %}
+                                        <img src="{{ item.producto.imagen.url }}" alt="{{ item.producto.nombre }}" 
+                                             class="rounded-3 border" style="width: 60px; height: 60px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="rounded-3 border bg-light d-flex align-items-center justify-content-center text-muted" style="width: 60px; height: 60px;">
+                                            <i class="bi bi-box-seam fs-4"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="mb-1 fw-bold text-dark">{{ item.producto.nombre }}</h6>
+                                    <small class="text-muted fw-semibold">x {{ item.cantidad }}</small>
+                                </div>
+                                
+                                <div class="text-end">
+                                    <span class="fw-bold text-dark">${{ item.cantidad|mul:item.producto.precio|floatformat:0 }}</span>
+                                </div>
+                            </div>
+                            {% endfor %}
                         </div>
-                        <div class="card-body p-4">
-                            <form method="post" enctype="multipart/form-data" id="payment-form">
-                                {% csrf_token %}
 
-                                <!-- OPCIONES DE PAGO -->
-                                <div class="mb-4">
-                                    <div class="form-check mb-3 p-4 border rounded bg-light">
-                                        <input class="form-check-input" type="radio" name="metodo_pago" value="transferencia" id="transferencia" checked>
-                                        <label class="form-check-label fw-bold fs-5" for="transferencia">
-                                            Transferencia Bancaria
-                                        </label>
-                                    </div>
-                                    <div class="form-check p-4 border rounded">
-                                        <input class="form-check-input" type="radio" name="metodo_pago" value="efectivo" id="efectivo">
-                                        <label class="form-check-label fw-bold fs-5" for="efectivo">
-                                            Efectivo al Retirar
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <!-- DATOS BANCARIOS -->
-                                <div id="datos-banco" class="alert alert-info mb-4">
-                                    <h5 class="text-primary mb-3"><i class="bi bi-bank"></i> Datos para Transferencia</h5>
-                                    <div class="row g-3">
-                                        <div class="col-12"><strong>Banco:</strong> Banco Estado</div>
-                                        <div class="col-12"><strong>Titular:</strong> Distribuidora Talagante SpA</div>
-                                        <div class="col-12"><strong>RUT:</strong> 77.777.777-7</div>
-                                        <div class="col-12"><strong>Cuenta Corriente:</strong> 123-456-789</div>
-                                        <div class="col-12"><strong>Email:</strong> pagos@talagante.cl</div>
-                                    </div>
-                                </div>
-
-                                <!-- SUBIR COMPROBANTE -->
-                                <div id="comprobante-section" class="mb-4">
-                                    <label class="form-label fw-bold text-danger">
-                                        <i class="bi bi-camera"></i> Captura del Comprobante <span class="text-muted">(obligatorio)</span>
-                                    </label>
-                                    <input type="file" name="comprobante" id="comprobante" class="form-control form-control-lg" accept="image/*" required>
-                                    <small class="text-muted">Sube una foto clara del comprobante de transferencia</small>
-                                </div>
-
-                                <!-- MENSAJE OPCIONAL -->
-                                <div class="mb-4">
-                                    <label class="form-label fw-bold">Mensaje (opcional)</label>
-                                    <textarea name="mensaje" class="form-control" rows="3" placeholder="Ej: Pagué desde Banco Santander a las 15:30"></textarea>
-                                </div>
-
-                                <!-- BOTÓN CON type="submit" (ESTO ES LA CLAVE) -->
-                                <button type="submit" class="btn btn-success btn-lg w-100 fw-bold shadow-lg">
-                                    <i class="bi bi-check-circle"></i> CONFIRMAR ORDEN
-                                </button>
-                            </form>
+                        <div class="bg-light px-4 py-4 border-top">
+                            <div class="d-flex justify-content-between mb-2 text-muted fw-medium">
+                                <span>Subtotal</span>
+                                <span>${{ total|floatformat:0 }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-4 text-muted fw-medium">
+                                <span>Envío</span>
+                                <span class="fst-italic">Por calcular</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center pt-3 border-top border-secondary">
+                                <span class="fs-4 fw-bold text-dark">Total a Pagar</span>
+                                <span class="fs-2 fw-bolder" style="color: var(--color-primary);">${{ total|floatformat:0 }}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                    <div class="card-header bg-dark text-white py-3">
+                        <h4 class="mb-0 fw-bold fs-5">
+                            <i class="bi bi-credit-card-2-front-fill me-2 opacity-50"></i>Método de Pago
+                        </h4>
+                    </div>
+                    
+                    <div class="card-body p-4 bg-white">
+                        <form method="post" enctype="multipart/form-data" id="payment-form">
+                            {% csrf_token %}
+
+                            <div class="payment-options-grid mb-4">
+                                
+                                <label class="payment-card-option animate-hover" for="transferencia">
+                                    <input type="radio" name="metodo_pago" value="transferencia" id="transferencia" checked>
+                                    <div class="card-content shadow-sm">
+                                        <div class="icon-box brand-icon-box">
+                                            <i class="bi bi-bank fs-3"></i>
+                                        </div>
+                                        <div class="text-content">
+                                            <span class="option-title fw-bold">Transferencia Bancaria</span>
+                                            <span class="option-desc small text-muted">Adjunta comprobante</span>
+                                        </div>
+                                        <div class="check-circle"><i class="bi bi-check-lg"></i></div>
+                                    </div>
+                                </label>
+
+                                <label class="payment-card-option animate-hover" for="efectivo">
+                                    <input type="radio" name="metodo_pago" value="efectivo" id="efectivo">
+                                    <div class="card-content shadow-sm">
+                                        <div class="icon-box brand-icon-box">
+                                            <i class="bi bi-cash-stack fs-3"></i>
+                                        </div>
+                                        <div class="text-content">
+                                            <span class="option-title fw-bold">Efectivo al Retirar</span>
+                                            <span class="option-desc small text-muted">Paga en el local</span>
+                                        </div>
+                                        <div class="check-circle"><i class="bi bi-check-lg"></i></div>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <div id="seccion-transferencia" class="mb-4 animate-fade-in-up">
+                                <div class="alert bg-light border-0 shadow-sm mb-3">
+                                    <h6 class="fw-bold mb-3" style="color: var(--color-primary);">
+                                        <i class="bi bi-info-circle-fill me-2"></i>Datos Bancarios
+                                    </h6>
+                                    <ul class="list-unstyled mb-0 small fw-medium text-dark">
+                                        <li class="mb-1"><strong>Banco:</strong> Banco Estado</li>
+                                        <li class="mb-1"><strong>Tipo:</strong> Cuenta Corriente</li>
+                                        <li class="mb-1"><strong>N° Cuenta:</strong> 123-456-789</li>
+                                        <li class="mb-1"><strong>RUT:</strong> 77.777.777-7</li>
+                                        <li class="mb-0"><strong>Correo:</strong> pagos@talagante.cl</li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold small text-uppercase text-muted">Subir Comprobante <span class="text-danger">*</span></label>
+                                    <input type="file" name="comprobante" id="comprobante" class="form-control" accept="image/*" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-bold small text-uppercase text-muted">Nota Adicional</label>
+                                <textarea name="mensaje" class="form-control" rows="2" placeholder="Ej: Pasaré a retirar a las 16:00"></textarea>
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg py-3 fs-5 fw-bold rounded-pill shadow-lg btn-confirmar animate-pulse">
+                                    <i class="bi bi-check2-circle me-2"></i>CONFIRMAR PEDIDO
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
 
-<!-- JavaScript -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const transferencia = document.getElementById('transferencia');
-    const efectivo = document.getElementById('efectivo');
-    const datosBanco = document.getElementById('datos-banco');
-    const comprobanteSection = document.getElementById('comprobante-section');
-    const comprobanteInput = document.getElementById('comprobante');
+    const transf = document.getElementById('transferencia');
+    const efec = document.getElementById('efectivo');
+    const secTransf = document.getElementById('seccion-transferencia');
+    const inpFile = document.getElementById('comprobante');
 
-    function updateForm() {
-        if (transferencia.checked) {
-            datosBanco.style.display = 'block';
-            comprobanteSection.style.display = 'block';
-            comprobanteInput.required = true;
+    function toggle() {
+        if (transf.checked) {
+            secTransf.style.display = 'block';
+            inpFile.required = true;
         } else {
-            datosBanco.style.display = 'none';
-            comprobanteSection.style.display = 'none';
-            comprobanteInput.required = false;
-            comprobanteInput.value = '';
+            secTransf.style.display = 'none';
+            inpFile.required = false;
+            inpFile.value = '';
         }
     }
-
-    transferencia.addEventListener('change', updateForm);
-    efectivo.addEventListener('change', updateForm);
-    updateForm();
+    transf.addEventListener('change', toggle);
+    efec.addEventListener('change', toggle);
+    toggle();
 });
 </script>
-
-<style>
-    .card { transition: all 0.3s; }
-    .card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.1)!important; }
-    .form-check-input:checked { background-color: #198754; border-color: #198754; }
-    .form-check { cursor: pointer; transition: all 0.2s; }
-    .form-check:hover { background-color: #f8f9fa; }
-</style>
 {% endblock %}

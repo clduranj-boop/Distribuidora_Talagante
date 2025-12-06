@@ -1,89 +1,204 @@
 {% extends "core/base.html" %}
 {% load humanize %}
 
-{% block title %}Gestión de Estados - Panel Admin{% endblock %}
+{% block title %}Gestión de Estados - Admin{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <h1 class="h3 mb-4 text-primary">
-        Gestión de Estados de Pedidos
-    </h1>
+<div class="container py-5 animate-fade-in">
+    
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h1 class="fw-bold mb-1" style="color: #1a1a1a;">
+                <i class="bi bi-sliders text-primary me-2"></i>Gestión de Estados
+            </h1>
+            <p class="text-muted mb-0">Administra y actualiza el estado de los pedidos.</p>
+        </div>
+        <div>
+            <a href="{% url 'admin_home' %}" class="btn btn-outline-dark rounded-pill px-4 fw-bold shadow-sm">
+                <i class="bi bi-arrow-left me-2"></i>Volver al Panel
+            </a>
+        </div>
+    </div>
 
-    <!-- Buscador y filtro -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-body">
-            <form method="get" class="row g-3 align-items-end">
+    <div class="card border-0 shadow-sm rounded-4 mb-5 bg-white">
+        <div class="card-body p-3">
+            <form method="get" class="row g-3 align-items-center">
+                
                 <div class="col-md-5">
-                    <input type="text" name="q" class="form-control" placeholder="Buscar por ID, nombre o cliente..." value="{{ busqueda }}">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-0 rounded-start-pill ps-4">
+                            <i class="bi bi-search text-muted"></i>
+                        </span>
+                        <input type="text" name="q" class="form-control border-0 bg-light py-2" 
+                               placeholder="Buscar por ID, Cliente o RUT..." value="{{ busqueda }}">
+                    </div>
                 </div>
+
                 <div class="col-md-4">
-                    <select name="estado" class="form-select">
+                    <select name="estado" class="form-select border-0 bg-light py-2 px-3 rounded-pill" style="cursor: pointer;">
                         <option value="">Todos los estados</option>
-                        {% for valor, label in Orden.ESTADOS %}
-                            <option value="{{ valor }}" {% if estado_filtro == valor %}selected{% endif %}>{{ label }}</option>
+                        {% for valor, label in estados_choices %}
+                            <option value="{{ valor }}" {% if estado_filtro == valor %}selected{% endif %}>
+                                {{ label }}
+                            </option>
                         {% endfor %}
                     </select>
                 </div>
-                <div class="col-md-3">
-                    <button type="submit" class="btn btn-primary me-2">Buscar</button>
-                    <a href="{% url 'gestion_estados' %}" class="btn btn-secondary">Limpiar</a>
+
+                <div class="col-md-3 d-flex gap-2 justify-content-end">
+                    <button type="submit" class="btn btn-primary rounded-pill fw-bold px-4 flex-grow-1">
+                        Buscar
+                    </button>
+                    <a href="{% url 'gestion_estados' %}" class="btn btn-light border rounded-pill px-3" title="Limpiar filtros">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                    </a>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Tabla -->
-    <div class="card shadow">
+    <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
         <div class="card-body p-0">
-            <table class="table table-hover mb-0 align-middle">
-                <thead class="table-dark">
-                    <tr>
-                        <th>#ID</th>
-                        <th>Cliente</th>
-                        <th>Total</th>
-                        <th>Estado Actual</th>
-                        <th>Cambiar Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for o in ordenes %}
-                    <tr>
-                        <td><strong>#{{ o.id }}</strong></td>
-                        <td>
-                            <div>{{ o.usuario.username }}</div>
-                            <small class="text-muted">{{ o.usuario.perfil.nombre_completo|default:"Sin nombre" }}</small>
-                        </td>
-                        <td class="text-success fw-bold">${{ o.total|intcomma }}</td>
-                        <td>
-                            <span class="badge bg-info fs-6">{{ o.get_estado_display }}</span>
-                        </td>
-                        <td>
-                            <form method="post" class="d-inline cambio-estado-form" data-orden-id="{{ o.id }}">
-                                {% csrf_token %}
-                                <select name="estado" class="form-select form-select-sm">
-                                    {% for valor, label in estados_choices %}
-                                        <option value="{{ valor }}" {% if o.estado == valor %}selected{% endif %}>
-                                            {{ label }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                            </form>
-                        </td>
-                        <td>
-                            <a href="{% url 'orden_detail' o.id %}" class="btn btn-sm btn-primary">Ver</a>
-                            <a href="{{ o.get_whatsapp_link }}" target="_blank" class="btn btn-sm btn-success">WhatsApp</a>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="6" class="text-center py-5 text-muted">
-                            <h4>No hay órdenes para mostrar</h4>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4 py-4 text-secondary text-uppercase small fw-bold">ID</th>
+                            <th class="py-4 text-secondary text-uppercase small fw-bold">Cliente</th>
+                            <th class="py-4 text-secondary text-uppercase small fw-bold text-end">Total</th>
+                            <th class="py-4 text-secondary text-uppercase small fw-bold text-center">Estado Actual</th>
+                            <th class="py-4 text-secondary text-uppercase small fw-bold ps-4">Cambiar Estado</th>
+                            <th class="pe-4 py-4 text-end text-secondary text-uppercase small fw-bold">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for o in ordenes %}
+                        <tr class="border-bottom border-light">
+                            <td class="ps-4 py-3">
+                                <span class="fw-bold text-dark">#{{ o.id }}</span>
+                            </td>
+                            
+                            <td class="py-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="rounded-circle bg-light border d-flex align-items-center justify-content-center me-3" 
+                                         style="width: 40px; height: 40px; min-width: 40px;">
+                                        <i class="bi bi-person text-muted"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-dark text-truncate" style="max-width: 150px;">
+                                            {{ o.usuario.username }}
+                                        </div>
+                                        <small class="text-muted d-block text-truncate" style="max-width: 150px;">
+                                            {{ o.usuario.perfil.nombre_completo|default:"Sin nombre" }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td class="py-3 text-end fw-bold text-dark">
+                                ${{ o.total|floatformat:0|intcomma }}
+                            </td>
+
+                            <td class="py-3 text-center">
+                                <span class="badge rounded-pill px-3 py-2 fw-normal border 
+                                    {% if o.estado == 'pendiente' %}bg-warning-subtle text-warning-emphasis border-warning-subtle
+                                    {% elif o.estado == 'confirmacion' %}bg-info-subtle text-info-emphasis border-info-subtle
+                                    {% elif o.estado == 'preparacion' %}bg-primary-subtle text-primary border-primary-subtle
+                                    {% elif o.estado == 'despacho' %}bg-orange-subtle text-orange-emphasis border-orange-subtle
+                                    {% elif o.estado == 'completado' %}bg-success-subtle text-success border-success-subtle
+                                    {% else %}bg-secondary-subtle text-secondary border-secondary-subtle{% endif %}">
+                                    {{ o.get_estado_display }}
+                                </span>
+                            </td>
+
+                            <td class="py-3 ps-4" style="min-width: 220px;">
+                                <form method="post" class="cambio-estado-form d-flex align-items-center" data-orden-id="{{ o.id }}">
+                                    {% csrf_token %}
+                                    <select name="estado" class="form-select form-select-sm border-secondary-subtle rounded-pill shadow-sm" 
+                                            style="cursor: pointer;">
+                                        {% for valor, label in estados_choices %}
+                                            <option value="{{ valor }}" {% if o.estado == valor %}selected{% endif %}>
+                                                {{ label }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </form>
+                            </td>
+
+                            <td class="pe-4 py-3 text-end">
+                                <div class="btn-group shadow-sm rounded-pill">
+                                    <a href="{% url 'orden_detail' o.id %}" class="btn btn-light btn-sm border-end px-3 py-2" title="Ver Detalle">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{{ o.get_whatsapp_link }}" target="_blank" class="btn btn-success btn-sm px-3 py-2" title="Contactar">
+                                        <i class="bi bi-whatsapp"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <div class="opacity-50 mb-3">
+                                    <i class="bi bi-search fs-1"></i>
+                                </div>
+                                <h5 class="fw-bold text-dark">No se encontraron pedidos</h5>
+                                <p class="mb-0">Intenta con otros filtros de búsqueda.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            {% if ordenes.has_other_pages %}
+            <div class="card-footer bg-white border-top py-4">
+                <nav aria-label="Navegación de páginas">
+                    <ul class="pagination justify-content-center mb-0 gap-2">
+                        {% if ordenes.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link rounded-circle border-0 bg-light text-dark d-flex align-items-center justify-content-center" 
+                                   href="?page={{ ordenes.previous_page_number }}&q={{ busqueda }}&estado={{ estado_filtro }}"
+                                   style="width: 40px; height: 40px;">
+                                    <i class="bi bi-chevron-left"></i>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link rounded-circle border-0 bg-light text-muted d-flex align-items-center justify-content-center" 
+                                      style="width: 40px; height: 40px;">
+                                    <i class="bi bi-chevron-left"></i>
+                                </span>
+                            </li>
+                        {% endif %}
+
+                        <li class="page-item active">
+                            <span class="page-link rounded-circle border-0 fw-bold d-flex align-items-center justify-content-center shadow-sm" 
+                                  style="width: 40px; height: 40px; background-color: var(--color-primary);">
+                                {{ ordenes.number }}
+                            </span>
+                        </li>
+
+                        {% if ordenes.has_next %}
+                            <li class="page-item">
+                                <a class="page-link rounded-circle border-0 bg-light text-dark d-flex align-items-center justify-content-center" 
+                                   href="?page={{ ordenes.next_page_number }}&q={{ busqueda }}&estado={{ estado_filtro }}"
+                                   style="width: 40px; height: 40px;">
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link rounded-circle border-0 bg-light text-muted d-flex align-items-center justify-content-center" 
+                                      style="width: 40px; height: 40px;">
+                                    <i class="bi bi-chevron-right"></i>
+                                </span>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -91,7 +206,11 @@
 <script>
 document.querySelectorAll('.cambio-estado-form select').forEach(select => {
     select.addEventListener('change', function() {
-        if (!confirm('¿Cambiar estado de la orden #' + this.closest('form').dataset.ordenId + '?')) return;
+        if (!confirm('¿Cambiar estado de la orden #' + this.closest('form').dataset.ordenId + '?')) {
+            // Si cancela, recargar para volver al valor anterior
+            window.location.reload(); 
+            return;
+        }
 
         const form = this.closest('form');
         const formData = new FormData(form);
@@ -108,15 +227,20 @@ document.querySelectorAll('.cambio-estado-form select').forEach(select => {
         .then(r => r.json())
         .then(data => {
             if (data.success) {
-                const badge = form.closest('tr').querySelector('.badge');
-                badge.textContent = data.nuevo_estado;
-                badge.className = 'badge bg-success fs-6';
-                alert('¡Estado actualizado y correo enviado al cliente!');
+                // Éxito: Recargar para ver el badge actualizado
+                window.location.reload();
             } else {
-                alert('Error al actualizar');
+                alert('Error al actualizar el estado.');
             }
         });
     });
 });
 </script>
+
+<style>
+    /* Estilos tabla admin */
+    .table-hover tbody tr:hover { background-color: #fcfcfc; }
+    .btn-group .btn { transition: all 0.2s; }
+    .btn-group .btn:hover { z-index: 1; transform: translateY(-2px); }
+</style>
 {% endblock %}

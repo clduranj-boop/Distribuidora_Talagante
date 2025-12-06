@@ -2,164 +2,198 @@
 {% load humanize %}
 {% load mathfilters %}
 
-{% block title %}Orden #{{ orden.id }} - Distribuidora Talagante{% endblock %}
-
-{% block extrahead %}
-<style>
-    .badge-confirmacion { background-color: #17a2b8 !important; }
-    .badge-preparacion  { background-color: #007bff !important; }
-    .badge-despacho     { background-color: #fd7e14 !important; }
-    .badge-completado   { background-color: #28a745 !important; }
-    .badge-cancelado    { background-color: #dc3545 !important; }
-    .badge-pendiente    { background-color: #ffc107; color: #212529 !important; }
-</style>
-{% endblock %}
+{% block title %}Orden #{{ orden.id }} - Detalle{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
+<div class="container py-5 animate-fade-in">
 
-    <!-- Título + Estado -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0">
-            Orden #{{ orden.id }}
-            <span class="badge fs-5 badge-{{ orden.estado }}">
-                {{ orden.get_estado_display }}
-            </span>
-        </h2>
-        <a href="{% url 'admin_panel' %}" class="btn btn-outline-secondary">
-            Volver al Panel
-        </a>
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <div class="d-flex align-items-center gap-3 mb-1">
+                <h1 class="fw-bold mb-0 text-dark">Orden #{{ orden.id }}</h1>
+                <span class="badge rounded-pill px-3 py-2 fs-6 border 
+                    {% if orden.estado == 'pendiente' %}bg-warning-subtle text-warning-emphasis border-warning-subtle
+                    {% elif orden.estado == 'confirmacion' %}bg-info-subtle text-info-emphasis border-info-subtle
+                    {% elif orden.estado == 'preparacion' %}bg-primary-subtle text-primary border-primary-subtle
+                    {% elif orden.estado == 'despacho' %}bg-orange-subtle text-orange-emphasis border-orange-subtle
+                    {% elif orden.estado == 'completado' %}bg-success-subtle text-success border-success-subtle
+                    {% else %}bg-secondary-subtle text-secondary border-secondary-subtle{% endif %}">
+                    {{ orden.get_estado_display }}
+                </span>
+            </div>
+            <p class="text-muted mb-0">
+                <i class="bi bi-calendar3 me-2"></i>{{ orden.fecha|date:"d M Y" }} • {{ orden.fecha|time:"H:i" }}
+            </p>
+        </div>
+        
+        <div>
+            {% if user.is_superuser %}
+                <a href="{% url 'gestion_estados' %}" class="btn btn-outline-dark rounded-pill px-4 fw-bold shadow-sm">
+                    <i class="bi bi-arrow-left me-2"></i>Volver al Panel
+                </a>
+            {% else %}
+                <a href="{% url 'mis_compras' %}" class="btn btn-outline-dark rounded-pill px-4 fw-bold shadow-sm">
+                    <i class="bi bi-arrow-left me-2"></i>Volver a Mis Pedidos
+                </a>
+            {% endif %}
+        </div>
     </div>
 
     <div class="row g-4">
 
-        <!-- Columna Cliente -->
         <div class="col-lg-4">
-            <div class="card shadow-sm">
-                <div class="card-header bg-dark text-white">
-                    <strong>Información del Cliente</strong>
+            <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden">
+                <div class="card-header bg-dark text-white py-3 px-4">
+                    <h5 class="mb-0 fw-bold fs-6 text-uppercase ls-1">
+                        <i class="bi bi-person-circle me-2 opacity-50"></i>Cliente
+                    </h5>
                 </div>
-                <div class="card-body">
-                    <p><strong>Usuario:</strong> {{ orden.usuario.username }}</p>
-                    <p><strong>Nombre completo:</strong> {{ orden.usuario.perfil.nombre_completo }}</p>
-                    <p><strong>Email:</strong> <a href="mailto:{{ orden.usuario.email }}">{{ orden.usuario.email }}</a></p>
-                    <p><strong>Teléfono:</strong> 
-                        {% if orden.usuario.perfil.telefono %}
-                            <a href="tel:+56{{ orden.usuario.perfil.telefono }}">{{ orden.usuario.perfil.telefono }}</a>
-                        {% else %}
-                            <span class="text-muted">No registrado</span>
-                        {% endif %}
-                    </p>
-                    <p><strong>RUT:</strong> {{ orden.usuario.perfil.rut }}</p>
-                    <p><strong>Fecha de la orden:</strong> {{ orden.fecha|date:"d/m/Y H:i" }}</p>
-                </div>
-            </div>
-
-            {% if orden.mensaje_cliente %}
-            <div class="card shadow-sm mt-4">
-                <div class="card-header bg-info text-white">
-                    <strong>Mensaje del Cliente</strong>
-                </div>
-                <div class="card-body">
-                    <p class="mb-0">{{ orden.mensaje_cliente|linebreaks }}</p>
-                </div>
-            </div>
-            {% endif %}
-        </div>
-
-        <!-- Columna Resumen y Acciones -->
-        <div class="col-lg-4">
-            <div class="card shadow-sm">
-                <div class="card-header bg-success text-white">
-                    <strong>Resumen de Pago</strong>
-                </div>
-                <div class="card-body text-center">
-                    <h3 class="text-success mb-3">${{ orden.total|intcomma }}</h3>
-                    <p><strong>Método:</strong> {{ orden.get_metodo_pago_display }}</p>
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="avatar-circle bg-light border me-3" style="width: 50px; height: 50px; font-size: 1.2rem;">
+                            {{ orden.usuario.username|make_list|first|upper }}
+                        </div>
+                        <div>
+                            <h5 class="fw-bold text-dark mb-0">{{ orden.usuario.perfil.nombre_completo|default:orden.usuario.username }}</h5>
+                            <small class="text-muted">@{{ orden.usuario.username }}</small>
+                        </div>
+                    </div>
                     
-                    {% if orden.comprobante %}
-                        <a href="{{ orden.comprobante.url }}" target="_blank" class="btn btn-success btn-sm mt-2">
-                            Ver Comprobante
-                        </a>
-                    {% else %}
-                        <p class="text-muted mt-2">Aún no ha subido comprobante</p>
+                    <ul class="list-unstyled mb-0 d-flex flex-column gap-3">
+                        <li class="d-flex align-items-center">
+                            <div class="icon-square bg-light text-muted me-3" style="width: 35px; height: 35px;">
+                                <i class="bi bi-envelope"></i>
+                            </div>
+                            <span class="text-dark">{{ orden.usuario.email }}</span>
+                        </li>
+                        <li class="d-flex align-items-center">
+                            <div class="icon-square bg-light text-muted me-3" style="width: 35px; height: 35px;">
+                                <i class="bi bi-telephone"></i>
+                            </div>
+                            <span class="text-dark">{{ orden.usuario.perfil.telefono|default:"No registrado" }}</span>
+                        </li>
+                        <li class="d-flex align-items-center">
+                            <div class="icon-square bg-light text-muted me-3" style="width: 35px; height: 35px;">
+                                <i class="bi bi-card-heading"></i>
+                            </div>
+                            <span class="text-dark">{{ orden.usuario.perfil.rut|default:"No registrado" }}</span>
+                        </li>
+                    </ul>
+
+                    {% if orden.mensaje_cliente %}
+                        <div class="alert bg-light border-0 mt-4 mb-0 rounded-3">
+                            <small class="fw-bold text-uppercase text-muted d-block mb-1" style="font-size: 0.7rem;">Nota del cliente</small>
+                            <p class="mb-0 small text-dark fst-italic">"{{ orden.mensaje_cliente }}"</p>
+                        </div>
                     {% endif %}
                 </div>
             </div>
+        </div>
 
-            <!-- Acciones rápidas -->
-            <div class="card shadow-sm mt-4">
-                <div class="card-header bg-primary text-white">
-                    <strong>Acciones Rápidas</strong>
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden">
+                <div class="card-header bg-white border-bottom py-3 px-4">
+                    <h5 class="mb-0 fw-bold fs-6 text-uppercase text-muted ls-1">
+                        <i class="bi bi-credit-card me-2"></i>Pago
+                    </h5>
                 </div>
-                <div class="list-group list-group-flush">
-                    <!-- BOTÓN CORREGIDO: VA A TU PÁGINA QUE FUNCIONA -->
-                    <a href="{% url 'gestion_estados' %}?q={{ orden.id }}" class="btn btn-warning">
-                        Cambiar Estado
-                    </a>
+                <div class="card-body p-4 text-center d-flex flex-column justify-content-center">
                     
-                    <a href="#whatsapp" 
-                       class="list-group-item list-group-item-action text-success">
-                        Enviar por WhatsApp
-                    </a>
-                    
-                    <a href="mailto:{{ orden.usuario.email }}?subject=Tu%20pedido%20#{{ orden.id }}&body=Hola%20{{ orden.usuario.first_name|default:orden.usuario.username }},%0A%0ATu%20orden%20está%20siendo%20procesada..."
-                       class="list-group-item list-group-item-action text-info">
-                        Enviar Correo
-                    </a>
+                    <div class="mb-4">
+                        <span class="d-block text-muted text-uppercase small fw-bold mb-1">Monto Total</span>
+                        <h2 class="fw-bold text-success display-6 mb-0">${{ orden.total|floatformat:0|intcomma }}</h2>
+                    </div>
+
+                    <div class="p-3 bg-light rounded-3 mb-3 border">
+                        <div class="d-flex align-items-center justify-content-center gap-2">
+                            {% if orden.metodo_pago == 'transferencia' %}
+                                <i class="bi bi-bank fs-4 text-primary"></i>
+                                <span class="fw-bold text-dark">Transferencia</span>
+                            {% else %}
+                                <i class="bi bi-cash-stack fs-4 text-success"></i>
+                                <span class="fw-bold text-dark">Efectivo</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if orden.comprobante %}
+                        <a href="{{ orden.comprobante.url }}" target="_blank" class="btn btn-outline-secondary w-100 rounded-pill btn-sm">
+                            <i class="bi bi-file-earmark-image me-2"></i>Ver Comprobante
+                        </a>
+                    {% else %}
+                        <span class="badge bg-light text-muted border fw-normal py-2">Sin comprobante</span>
+                    {% endif %}
+
                 </div>
+                
+                {% if user.is_superuser %}
+                <div class="card-footer bg-light p-3">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'gestion_estados' %}?q={{ orden.id }}" class="btn btn-warning btn-sm fw-bold text-dark">
+                            <i class="bi bi-pencil-square me-2"></i>Cambiar Estado
+                        </a>
+                        <a href="{{ orden.get_whatsapp_link }}" target="_blank" class="btn btn-success btn-sm fw-bold">
+                            <i class="bi bi-whatsapp me-2"></i>Contactar Cliente
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
             </div>
         </div>
 
-        <!-- Columna Productos -->
         <div class="col-lg-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-dark text-white">
-                    <strong>Productos ({{ orden.itemorden_set.count }})</strong>
+            <div class="card border-0 shadow-lg rounded-4 h-100 overflow-hidden">
+                <div class="card-header py-3 px-4 text-white" style="background-color: #748C28;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold fs-6 text-uppercase ls-1">
+                            <i class="bi bi-basket2 me-2"></i>Productos
+                        </h5>
+                        <span class="badge bg-white text-dark rounded-pill">{{ orden.itemorden_set.count }}</span>
+                    </div>
                 </div>
+                
                 <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-sm mb-0">
-                            <thead class="table-light">
+                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light text-secondary small text-uppercase">
                                 <tr>
-                                    <th>Producto</th>
-                                    <th class="text-center">Cant.</th>
-                                    <th class="text-end">Subtotal</th>
+                                    <th class="ps-4 py-2">Item</th>
+                                    <th class="text-center py-2">Cant</th>
+                                    <th class="pe-4 text-end py-2">Total</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for item in orden.itemorden_set.all %}
                                 <tr>
-                                    <td><strong>{{ item.producto.nombre }}</strong></td>
-                                    <td class="text-center">{{ item.cantidad }}</td>
-                                    <td class="text-end">${{ item.cantidad|mul:item.precio|intcomma }}</td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="3" class="text-center text-muted py-4">No hay productos</td>
+                                    <td class="ps-4 py-3">
+                                        <div class="fw-bold text-dark small">{{ item.producto.nombre }}</div>
+                                        <div class="text-muted" style="font-size: 0.75rem;">${{ item.precio|floatformat:0|intcomma }}</div>
+                                    </td>
+                                    <td class="text-center fw-bold text-secondary">{{ item.cantidad }}</td>
+                                    <td class="pe-4 text-end fw-bold text-dark">
+                                        ${{ item.cantidad|mul:item.precio|floatformat:0|intcomma }}
+                                    </td>
                                 </tr>
                                 {% endfor %}
-                                <tr class="table-success fw-bold">
-                                    <td colspan="2" class="text-end">TOTAL:</td>
-                                    <td class="text-end fs-5">${{ orden.total|intcomma }}</td>
-                                </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
+                
+                <div class="card-footer bg-white border-top p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted fw-bold text-uppercase small">Total Final</span>
+                        <span class="fs-4 fw-bolder text-dark">${{ orden.total|floatformat:0|intcomma }}</span>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- WhatsApp directo -->
-    <div id="whatsapp" class="mt-5 text-center">
-        <hr>
-        <p class="lead mb-3">Enviar resumen automático al cliente por WhatsApp</p>
-        <a href="{{ orden.get_whatsapp_link }}" target="_blank" 
-           class="btn btn-success btn-lg px-5">
-            Abrir WhatsApp con el Pedido
-        </a>
     </div>
-
 </div>
+
+<style>
+    .ls-1 { letter-spacing: 1px; }
+    .icon-square { border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+</style>
 {% endblock %}

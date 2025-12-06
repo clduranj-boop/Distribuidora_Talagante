@@ -1,12 +1,11 @@
 ﻿import os
 from pathlib import Path
 from django.contrib.messages import constants as messages
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 LOGIN_URL = '/login/'
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-bzo3^)g+tn*e1wgnoe=bc4gn0i=0y9%lty(4%=xqyqwd_1-&3)'
@@ -16,10 +15,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver']
 
-APPEND_SLASH = True  # O False, según prefieras
+APPEND_SLASH = True
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -29,7 +27,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'core',
     'rest_framework',
-    'django.contrib.humanize',
+    'django.contrib.humanize', # Importante para los precios
 ]
 
 MIDDLEWARE = [
@@ -40,9 +38,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    
-    
-
 ]
 
 ROOT_URLCONF = 'distribuidora.urls'
@@ -67,8 +62,6 @@ WSGI_APPLICATION = 'distribuidora.wsgi.application'
 
 
 # Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -78,8 +71,6 @@ DATABASES = {
 
 
 # Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -96,47 +87,52 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
+# =================================================
+# CONFIGURACIÓN DE IDIOMA Y FORMATO DE PRECIOS
+# =================================================
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es-cl' # Español Chile
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Santiago' # Hora de Chile
 
 USE_I18N = True
 
 USE_TZ = True
-STATIC_URL = '/static/'
+
+# ESTO ES LO QUE HACE QUE SALGA $10.000 (Puntos en miles)
+USE_L10N = True
+USE_THOUSAND_SEPARATOR = True
+THOUSAND_SEPARATOR = '.'
+DECIMAL_SEPARATOR = ','
+NUMBER_GROUPING = 3
+
+
+# Static files (CSS, JavaScript, Images)
+STATIC_URL = '/static/' # Corregido (tenías dos definiciones distintas)
+STATICFILES_DIRS = [
+    'static',
+]
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [
-    'static',  # Carpeta global para static files
-]
-
 # Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-#Validación Correo
+
+# Validación Correo
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'fabriicratos10@gmail.com'          # ← Tu correo
-EMAIL_HOST_PASSWORD = 'ownr xwfg tkgh uqnl'       # ← Contraseña de aplicación (te explico abajo)
+EMAIL_HOST_USER = 'fabriicratos10@gmail.com'
+EMAIL_HOST_PASSWORD = 'ownr xwfg tkgh uqnl'
 DEFAULT_FROM_EMAIL = 'Distribuidora Talagante <fabriicratos10@gmail.com>'
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
+# Configuración de Mensajes (Alertas)
 MESSAGE_TAGS = {
     messages.DEBUG: 'debug',
     messages.INFO: 'info',
     messages.SUCCESS: 'success',
     messages.WARNING: 'warning',
-    messages.ERROR: 'danger',   # <-- Esto hace que "error" se muestre como alert-danger de Bootstrap
+    messages.ERROR: 'danger',
 }

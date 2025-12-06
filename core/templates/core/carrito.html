@@ -1,8 +1,6 @@
 ﻿{% extends "core/base.html" %}
-{% include 'core/mensajes.html' %}
 {% load static %}
 {% block title %}Carrito — Distribuidora{% endblock %}
-
 
 {% block content %}
 <div class="carrito">
@@ -20,12 +18,16 @@
       </div>
     {% else %}
       <div class="cart-wrap">
+        
         <div class="cart-table">
           <table>
             <thead>
               <tr>
-                <th>Producto</th><th>Precio</th><th>Cant.</th><th>Subtotal</th><th></th>
-              </tr>
+                <th>Producto</th>
+                <th>Precio</th>
+                <th>Cant.</th>
+                <th>Subtotal</th>
+                <th></th> </tr>
             </thead>
             <tbody>
               {% for it in items %}
@@ -36,12 +38,31 @@
                     {% else %}
                       <img class="thumb" src="{% static 'core/img/placeholder.png' %}" alt="{{ it.producto.nombre }}">
                     {% endif %}
-                    {{ it.producto.nombre }}
+                    <div>
+                        <div style="font-weight:600;">{{ it.producto.nombre }}</div>
+                        <small class="text-muted">ID: {{ it.producto.id }}</small>
+                    </div>
                   </td>
-                  <td>${{ it.producto.precio }}</td>
-                  <td>{{ it.cantidad }}</td>
-                  <td>${{ it.subtotal }}</td>
-                  <td><a class="btn btn-danger" href="{% url 'remove_from_carrito' it.id %}">Quitar</a></td>
+                  
+                  <td>${{ it.producto.precio|floatformat:0 }}</td>
+                  
+                  <td>
+                    <div class="qty-selector">
+                        <a href="{% url 'restar_producto' it.id %}" class="qty-btn">-</a>
+      
+                        <span class="qty-val">{{ it.cantidad }}</span>
+      
+                        <a href="{% url 'sumar_producto' it.id %}" class="qty-btn">+</a>
+                    </div>
+                  </td>
+                  
+                  <td class="fw-bold text-success">${{ it.subtotal|floatformat:0 }}</td>
+                  
+                  <td>
+                    <a href="{% url 'remove_from_carrito' it.id %}" class="btn-trash" title="Eliminar del carrito">
+                        <i class="bi bi-trash3-fill"></i>
+                    </a>
+                  </td>
                 </tr>
               {% endfor %}
             </tbody>
@@ -50,11 +71,15 @@
 
         <aside class="summary">
           <h3>Resumen</h3>
-          <div class="sum-row"><span>Subtotal</span><span>${{ total }}</span></div>
-          <div class="sum-row"><span>Envío</span><span>—</span></div>
-          <div class="sum-row sum-total"><span>Total</span><span>${{ total }}</span></div>
-          <a href="{% url 'checkout' %}" class="btn btn-success">Proceder al Pago</a> 
+          <div class="sum-row"><span>Subtotal</span><span>${{ total|floatformat:0 }}</span></div>
+          <div class="sum-row"><span>Envío</span><span>Por calcular</span></div>
+          <div class="sum-row sum-total">
+            <span>Total</span>
+            <span>${{ total|floatformat:0 }}</span>
+          </div>
+          <a href="{% url 'checkout' %}" class="btn btn-success w-100 mt-3 shadow">Proceder al Pago</a> 
         </aside>
+
       </div>
     {% endif %}
   </main>
