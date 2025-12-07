@@ -42,4 +42,12 @@ urlpatterns = [
     path('test-correo/', views.test_correo),
     path('sumar/<int:item_id>/', views.sumar_producto, name='sumar_producto'),
     path('restar/<int:item_id>/', views.restar_producto, name='restar_producto'),
+    path('carrito/actualizar/<int:item_id>/', views.actualizar_cantidad_carrito, name='actualizar_cantidad_carrito'),
+    path('autocompletar-direccion/', views.autocompletar_direccion, name='autocompletar_direccion'),
+    path('reenviar-codigo/', views.reenviar_codigo, name='reenviar_codigo'),
+    path('recuperar-password/', views.recuperar_password, name='recuperar_password'),
+    path('cambiar-password/<str:token>/', views.cambiar_password_view, name='cambiar_password'),
+    path('cambiar-correo-registro/', views.cambiar_correo_registro, name='cambiar_correo_registro'),
+    path('admin/producto/crear-con-codigo/', views.redirigir_crear_producto_con_codigo, name='crear_producto_con_codigo'),
+    
 ]

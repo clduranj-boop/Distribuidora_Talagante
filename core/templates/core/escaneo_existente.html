@@ -1,0 +1,64 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Ajustar Stock - {{ producto.nombre }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="card shadow-lg border-0 rounded-4" style="max-width: 1000px; margin: 0 auto;">
+        <!-- Header -->
+        <div class="card-header bg-primary text-white text-center py-4">
+            <h2 class="mb-0 fw-bold fs-3">{{ producto.nombre }}</h2>
+            {% if producto.imagen %}
+                <img src="{{ producto.imagen.url }}" class="img-fluid rounded mt-3" style="max-height: 140px;">
+            {% endif %}
+        </div>
+
+        <!-- Stock actual -->
+        <div class="text-center py-4 bg-dark text-white">
+            <p class="mb-2 fs-5 opacity-75">Stock actual</p>
+            <h1 class="display-4 fw-bold text-success mb-0">
+                {{ producto.stock }} <small class="fs-4">{{ producto.unidad_medida }}</small>
+            </h1>
+        </div>
+
+        <!-- Formulario en una sola fila -->
+        <div class="card-body p-5">
+            <form method="post" class="text-center">
+                {% csrf_token %}
+                <input type="hidden" name="codigo_barras" value="{{ producto.codigo_barras }}">
+                <input type="hidden" name="accion" value="confirmar">
+
+                <div class="d-flex flex-wrap justify-content-center align-items-center gap-3">
+
+                    <!-- RESTAR -->
+                    <button type="submit" name="cantidad" value="-10" class="btn btn-danger btn-lg px-4 py-3 fs-4 fw-bold">−10</button>
+                    <button type="submit" name="cantidad" value="-5" class="btn btn-danger btn-lg px-4 py-3 fs-4 fw-bold">−5</button>
+                    <button type="submit" name="cantidad" value="-1" class="btn btn-outline-danger btn-lg px-4 py-3 fs-4 fw-bold">−1</button>
+
+                    <!-- Input cantidad -->
+                    <input type="number" name="cantidad" class="form-control form-control-lg text-center mx-3" 
+                           style="width: 180px; font-size: 2rem; font-weight: bold;" 
+                           placeholder="0" step="any" autofocus>
+
+                    <!-- SUMAR -->
+                    <button type="submit" name="cantidad" value="1" class="btn btn-outline-success btn-lg px-4 py-3 fs-4 fw-bold">+1</button>
+                    <button type="submit" name="cantidad" value="5" class="btn btn-success btn-lg px-4 py-3 fs-4 fw-bold">+5</button>
+                    <button type="submit" name="cantidad" value="10" class="btn btn-success btn-lg px-4 py-3 fs-4 fw-bold">+10</button>
+                </div>
+
+                <div class="mt-4 text-muted">
+                    <small>Negativo = restar · Positivo = sumar</small>
+                </div>
+            </form>
+        </div>
+
+        <!-- Footer con volver -->
+        <div class="card-footer text-center py-4">
+            <a href="{% url 'escaneo_rapido' %}" class="btn btn-secondary btn-lg px-5">
+                ← Volver a escanear
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

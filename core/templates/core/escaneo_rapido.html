@@ -1,125 +1,159 @@
+{% extends "core/base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>Escaneo Rápido</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body { background: #f0f8ff; padding-top: 15vh; }
-        #codigo-input { font-size: 4rem; text-align: center; height: 120px; }
-        .cantidad-box { font-size: 3rem; }
-        .beep { display: none; }
 
-        body { 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding-top: 10vh;
-        }
-        .card-escaneo {
-            max-width: 700px;
-            margin: 0 auto;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-        }
-        #codigo-input { 
-            font-size: 4.5rem; 
-            height: 140px; 
-            text-align: center; 
-            font-weight: bold;
-            letter-spacing: 8px;
-        }
-        .cantidad-box { font-size: 3.5rem; }
-        .beep { display: none; }
-        .btn-volver {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 9999;
-        }
-    </style>
-</head>
-<body>
-<!-- BOTÓN PARA VOLVER AL PANEL DE ADMIN -->
-<a href="{% url 'admin_home' %}" class="btn btn-light btn-lg rounded-pill shadow-lg btn-volver d-flex align-items-center gap-3">
-    <i class="bi bi-arrow-left-circle-fill fs-3"></i>
-    <div class="text-start">
-        <div class="fw-bold">Volver al</div>
-        <div class="fs-5">Panel Admin</div>
-    </div>
-</a>
-<div class="container text-center">
-    <h1 class="display-3 mb-5">Escanea el código</h1>
+{% block title %}Escaneo Rápido de Stock{% endblock %}
 
-    <form method="post" id="form-codigo">
-        {% csrf_token %}
-        <input type="text" id="codigo-input" class="form-control mb-4" autocomplete="off" autofocus>
-    </form>
+{% block content %}
+<style>
+    /* Fondo normal del sitio + espacio para navbar y footer */
+    .escaneo-wrapper {
+        min-height: 100vh;
+        padding: 100px 15px 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bs-body-bg);
+    }
 
-    <div id="caja-cantidad" class="mt-5" style="display:none;">
-        <h2 id="nombre-tentativo" class="mb-4"></h2>
-        <form method="post" id="form-cantidad">
-            {% csrf_token %}
-            <input type="hidden" name="codigo_barras" id="codigo-hidden">
-            <div class="input-group input-group-lg cantidad-box">
-                <input type="number" name="cantidad" step="any" class="form-control text-center" 
-                       placeholder="Cantidad (kg, cajas, etc.)" required autofocus>
-                <button class="btn btn-success btn-lg px-5">✓ Confirmar</button>
+    /* Panel central - grande, negro y perfectamente centrado */
+    .panel-central {
+        background: rgba(0, 0, 0, 0.93);
+        border: 8px solid #007bff;
+        border-radius: 45px;
+        padding: 80px 50px;
+        width: 100%;
+        max-width: 1000px;
+        box-shadow: 0 40px 120px rgba(0,0,0,0.6);
+        backdrop-filter: blur(18px);
+        margin: 0 auto; /* ← Esto es clave para centrar perfecto */
+    }
+
+    /* Input gigante y perfecto */
+    #codigo-input {
+        font-size: clamp(2.8rem, 11vw, 6.5rem) !important;
+        height: clamp(130px, 28vh, 260px);
+        text-align: center;
+        font-weight: bold;
+        letter-spacing: 0.18em;
+        background: white;
+        color: #000;
+        border: 14px solid #007bff;
+        border-radius: 40px;
+        box-shadow: 0 30px 70px rgba(0,0,0,0.7);
+        padding: 20px;
+        width: 100%;
+        box-sizing: border-box;
+        transition: all 0.3s ease;
+    }
+
+    #codigo-input:focus {
+        border-color: #00d4ff;
+        box-shadow: 0 0 45px #00d4ff, 0 30px 70px rgba(0,212,255,0.5);
+        outline: none;
+    }
+
+    /* Textos */
+    .titulo-escaneo {
+        color: white;
+        text-shadow: 5px 5px 22px rgba(0,0,0,0.9);
+        font-weight: 900;
+        font-size: clamp(3rem, 9vw, 6rem);
+        letter-spacing: 4px;
+    }
+
+    .subtitulo-escaneo {
+        color: #a0e8ff;
+        text-shadow: 3px 3px 14px rgba(0,0,0,0.8);
+        font-size: clamp(1.3rem, 4.5vw, 2.2rem);
+    }
+
+    .icono-escaneo {
+        font-size: clamp(6rem, 18vw, 10rem);
+        color: #00d4ff;
+        text-shadow: 0 0 60px #00d4ff;
+        animation: glow 2.5s infinite alternate;
+    }
+
+    @keyframes glow {
+        from { text-shadow: 0 0 35px #00d4ff; }
+        to { text-shadow: 0 0 80px #00d4ff, 0 0 120px #00d4ff; }
+    }
+
+    /* Responsive fino */
+    @media (max-width: 576px) {
+        .panel-central {
+            padding: 50px 25px;
+            border-width: 6px;
+            border-radius: 35px;
+        }
+        #codigo-input {
+            border-width: 10px;
+        }
+    }
+</style>
+
+<div class="escaneo-wrapper">
+    <div class="container">
+        <div class="panel-central text-center">
+            <!-- Icono gigante -->
+            <div class="mb-5">
+                <i class="bi bi-upc-scan icono-escaneo"></i>
             </div>
-        </form>
-    </div>
 
-    {% include 'core/mensajes.html' %}
+            <!-- Título -->
+            <h1 class="titulo-escaneo mb-4">
+                ESCANEO RÁPIDO
+            </h1>
+
+            <!-- Subtítulo -->
+            <p class="subtitulo-escaneo mb-5">
+                Apunta el lector al código de barras
+            </p>
+
+            <!-- Input perfecto -->
+            <form method="post" id="form-escaneo">
+                {% csrf_token %}
+                <input type="text"
+                       name="codigo_barras"
+                       id="codigo-input"
+                       class="form-control mx-auto d-block"
+                       placeholder="ESCANEA AQUÍ"
+                       autocomplete="off"
+                       autofocus
+                       required>
+            </form>
+
+            <!-- Ayuda -->
+            <div class="mt-5">
+                <p class="fs-4" style="color: #80c8ff; text-shadow: 2px 2px 12px black;">
+                    Detecta automáticamente si el producto existe o es nuevo
+                </p>
+            </div>
+        </div>
+    </div>
 </div>
 
-<audio class="beep" src="{% static 'beep.mp3' %}" preload="auto"></audio>
+<audio id="beep" src="{% static 'beep.mp3' %}" preload="auto"></audio>
 
 <script>
-const inputCodigo = document.getElementById('codigo-input');
-const cajaCantidad = document.getElementById('caja-cantidad');
-const inputCantidad = document.querySelector('#form-cantidad input[name="cantidad"]');
-const codigoHidden = document.getElementById('codigo-hidden');
+const input = document.getElementById('codigo-input');
+input.focus();
 
-inputCodigo.focus();
-
-inputCodigo.addEventListener('input', function() {
-    let valor = this.value.trim();
-    
-    // Acepta códigos desde 4 dígitos en adelante (cubre TODOS los casos reales)
-    if (valor.length >= 4 && valor.length <= 30) {
-        // Si el usuario presionó Enter o el escáner mandó Enter automático
-        if (e && e.key === 'Enter') return; // evita doble envío
-        
-        codigoHidden.value = valor;
-        cajaCantidad.style.display = 'block';
-        inputCantidad.focus();
-        inputCantidad.select();
-        this.value = '';  // limpia para el siguiente escaneo
-        document.querySelector('.beep')?.play?.();
+// Mantener foco siempre
+setInterval(() => {
+    if (document.activeElement !== input) {
+        input.focus();
     }
-});
+}, 500);
 
-// También acepta Enter manual (por si el escáner no lo manda)
-inputCodigo.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') {
-        e.preventDefault();
-        let valor = this.value.trim();
-        if (valor.length >= 4 && valor.length <= 30) {
-            codigoHidden.value = valor;
-            cajaCantidad.style.display = 'block';
-            inputCantidad.focus();
-            inputCantidad.select();
-            this.value = '';
-        }
-    }
-});
-// Enter en cantidad → envía
-inputCantidad?.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') {
-        document.getElementById('form-cantidad').submit();
+input.addEventListener('input', function() {
+    const valor = this.value.trim();
+    if (valor.length >= 4 && valor.length <= 50) {
+        document.getElementById('beep').play();
+        setTimeout(() => {
+            document.getElementById('form-escaneo').submit();
+        }, 400);
     }
 });
 </script>
-</body>
-</html>
+{% endblock %}

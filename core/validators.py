@@ -12,7 +12,6 @@ def validar_contraseña_fuerte(password):
     if not re.search(r"[0-9]", password):
         raise ValidationError("La contraseña debe contener al menos un número.")
 
-    # Opcional: bloquear contraseñas muy comunes
     comunes = ["12345678", "password", "123456789", "qwerty123", "admin123"]
     if password.lower() in comunes or password.lower() in [c[::-1] for c in comunes]:
         raise ValidationError("Esa contraseña es muy común. Elige una más segura.")

@@ -22,18 +22,18 @@
                 </span>
             </div>
             <p class="text-muted mb-0">
-                <i class="bi bi-calendar3 me-2"></i>{{ orden.fecha|date:"d M Y" }} • {{ orden.fecha|time:"H:i" }}
+                {{ orden.fecha|date:"d M Y" }} • {{ orden.fecha|time:"H:i" }}
             </p>
         </div>
         
         <div>
             {% if user.is_superuser %}
                 <a href="{% url 'gestion_estados' %}" class="btn btn-outline-dark rounded-pill px-4 fw-bold shadow-sm">
-                    <i class="bi bi-arrow-left me-2"></i>Volver al Panel
+                    Volver al Panel
                 </a>
             {% else %}
                 <a href="{% url 'mis_compras' %}" class="btn btn-outline-dark rounded-pill px-4 fw-bold shadow-sm">
-                    <i class="bi bi-arrow-left me-2"></i>Volver a Mis Pedidos
+                    Volver a Mis Pedidos
                 </a>
             {% endif %}
         </div>
@@ -41,11 +41,12 @@
 
     <div class="row g-4">
 
+        <!-- CLIENTE -->
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden">
                 <div class="card-header bg-dark text-white py-3 px-4">
                     <h5 class="mb-0 fw-bold fs-6 text-uppercase ls-1">
-                        <i class="bi bi-person-circle me-2 opacity-50"></i>Cliente
+                        Cliente
                     </h5>
                 </div>
                 <div class="card-body p-4">
@@ -90,15 +91,53 @@
             </div>
         </div>
 
+        <!-- ENVÍO (NUEVA SECCIÓN CON COMUNA + WHATSAPP) -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden">
+                <div class="card-header py-3 px-4 text-white" style="background: linear-gradient(135deg, #28a745, #20c997);">
+                    <h5 class="mb-0 fw-bold fs-6 text-uppercase ls-1">
+                        Envío
+                    </h5>
+                </div>
+                <div class="card-body p-4 text-center">
+                    {% if orden.direccion_envio.metodo == 'retiro' %}
+                        <div class="mb-4">
+                            <i class="bi bi-shop-window fs-1 text-success"></i>
+                            <h4 class="fw-bold text-success mt-3">Retiro en Local</h4>
+                            <p class="text-muted">El cliente pasará a retirar</p>
+                        </div>
+                    {% else %}
+                        <div class="mb-4">
+                            <i class="bi bi-truck fs-1 text-primary"></i>
+                            <h4 class="fw-bold text-primary mt-3">
+                                Envío a {{ orden.direccion_envio.get_comuna_display }}
+                            </h4>
+                            <p class="text-muted mb-4">
+                                Coordinar dirección exacta por WhatsApp
+                            </p>
+                        </div>
+
+                        <div class="alert alert-warning border-0 rounded-3">
+                            <strong class="d-block mb-2">Contactar al cliente</strong>
+                            <a href="https://wa.me/56{{ orden.usuario.perfil.telefono|cut:'+'|cut:' '|cut:' ' }}" 
+                               target="_blank" class="btn btn-success btn-lg w-100 shadow-sm">
+                                Abrir WhatsApp
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGO -->
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden">
                 <div class="card-header bg-white border-bottom py-3 px-4">
                     <h5 class="mb-0 fw-bold fs-6 text-uppercase text-muted ls-1">
-                        <i class="bi bi-credit-card me-2"></i>Pago
+                        Pago
                     </h5>
                 </div>
                 <div class="card-body p-4 text-center d-flex flex-column justify-content-center">
-                    
                     <div class="mb-4">
                         <span class="d-block text-muted text-uppercase small fw-bold mb-1">Monto Total</span>
                         <h2 class="fw-bold text-success display-6 mb-0">${{ orden.total|floatformat:0|intcomma }}</h2>
@@ -118,35 +157,35 @@
 
                     {% if orden.comprobante %}
                         <a href="{{ orden.comprobante.url }}" target="_blank" class="btn btn-outline-secondary w-100 rounded-pill btn-sm">
-                            <i class="bi bi-file-earmark-image me-2"></i>Ver Comprobante
+                            Ver Comprobante
                         </a>
                     {% else %}
                         <span class="badge bg-light text-muted border fw-normal py-2">Sin comprobante</span>
                     {% endif %}
 
-                </div>
-                
-                {% if user.is_superuser %}
-                <div class="card-footer bg-light p-3">
-                    <div class="d-grid gap-2">
-                        <a href="{% url 'gestion_estados' %}?q={{ orden.id }}" class="btn btn-warning btn-sm fw-bold text-dark">
-                            <i class="bi bi-pencil-square me-2"></i>Cambiar Estado
-                        </a>
-                        <a href="{{ orden.get_whatsapp_link }}" target="_blank" class="btn btn-success btn-sm fw-bold">
-                            <i class="bi bi-whatsapp me-2"></i>Contactar Cliente
-                        </a>
+                    {% if user.is_superuser %}
+                    <div class="card-footer bg-light p-3 mt-auto">
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'gestion_estados' %}?q={{ orden.id }}" class="btn btn-warning btn-sm fw-bold text-dark">
+                                Cambiar Estado
+                            </a>
+                            <a href="{{ orden.get_whatsapp_link }}" target="_blank" class="btn btn-success btn-sm fw-bold">
+                                Contactar Cliente
+                            </a>
+                        </div>
                     </div>
+                    {% endif %}
                 </div>
-                {% endif %}
             </div>
         </div>
 
-        <div class="col-lg-4">
-            <div class="card border-0 shadow-lg rounded-4 h-100 overflow-hidden">
+        <!-- PRODUCTOS -->
+        <div class="col-12">
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
                 <div class="card-header py-3 px-4 text-white" style="background-color: #748C28;">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="mb-0 fw-bold fs-6 text-uppercase ls-1">
-                            <i class="bi bi-basket2 me-2"></i>Productos
+                            Productos
                         </h5>
                         <span class="badge bg-white text-dark rounded-pill">{{ orden.itemorden_set.count }}</span>
                     </div>
@@ -157,9 +196,9 @@
                         <table class="table table-hover align-middle mb-0">
                             <thead class="bg-light text-secondary small text-uppercase">
                                 <tr>
-                                    <th class="ps-4 py-2">Item</th>
-                                    <th class="text-center py-2">Cant</th>
-                                    <th class="pe-4 text-end py-2">Total</th>
+                                    <th class="ps-4">Item</th>
+                                    <th class="text-center">Cant</th>
+                                    <th class="pe-4 text-end">Total</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -178,12 +217,12 @@
                             </tbody>
                         </table>
                     </div>
-                </div>
-                
-                <div class="card-footer bg-white border-top p-4">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="text-muted fw-bold text-uppercase small">Total Final</span>
-                        <span class="fs-4 fw-bolder text-dark">${{ orden.total|floatformat:0|intcomma }}</span>
+                    
+                    <div class="card-footer bg-white border-top p-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted fw-bold text-uppercase small">Total Final</span>
+                            <span class="fs-4 fw-bolder text-dark">${{ orden.total|floatformat:0|intcomma }}</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -195,5 +234,9 @@
 <style>
     .ls-1 { letter-spacing: 1px; }
     .icon-square { border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+    .avatar-circle { 
+        display: flex; align-items: center; justify-content: center; 
+        font-weight: bold; background: #f8f9fa;
+    }
 </style>
 {% endblock %}

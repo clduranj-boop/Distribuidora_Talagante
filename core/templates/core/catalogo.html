@@ -1,27 +1,35 @@
 ﻿{% extends "core/base.html" %}
-{% load static %}
+{% load static humanize %}
 {% block title %}Catálogo — Distribuidora{% endblock %}
 
 {% block content %}
 <div class="catalogo">
   <main class="container">
 
-    <form method="get" class="filters">
-      <select name="categoria">
-        <option value="">Todas las categorías</option>
-        {% for c in categorias %}
-          <option value="{{ c }}" {% if request.GET.categoria == c %}selected{% endif %}>{{ c }}</option>
-        {% endfor %}
-      </select>
-      <input type="number" min="0" step="100" name="precio_max" value="{{ request.GET.precio_max }}" placeholder="Precio máx.">
-      <button class="btn btn-primary" type="submit">Filtrar</button>
+    <form method="get" class="filters mb-4">
+      <div class="row g-3">
+        <div class="col-auto">
+          <select name="categoria" class="form-select">
+            <option value="">Todas las categorías</option>
+            {% for c in categorias %}
+              <option value="{{ c }}" {% if request.GET.categoria == c %}selected{% endif %}>{{ c }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-auto">
+          <input type="number" min="0" step="100" name="precio_max" value="{{ request.GET.precio_max }}" 
+                 placeholder="Precio máximo" class="form-control">
+        </div>
+        <div class="col-auto">
+          <button class="btn btn-primary" type="submit">Filtrar</button>
+        </div>
+      </div>
     </form>
 
     <section class="product-grid">
       {% if productos %}
         {% for p in productos %}
           <article class="product-card">
-            
             <div class="product-media">
               {% if p.imagen %}
                 <img src="{{ p.imagen.url }}" alt="{{ p.nombre }}">
@@ -31,32 +39,51 @@
             </div>
 
             <div class="product-body">
-              
-              <div class="product-price">${{ p.precio|floatformat:0 }}</div>
-
               <h3 class="product-title">{{ p.nombre }}</h3>
-              <div class="product-cat">{{ p.categoria }}</div>
+              <div class="product-cat text-muted small">{{ p.categoria }}</div>
 
-              <div class="price-row mt-auto">
-                {% if p.stock|default:0 > 0 and p.activo %}
-                  <a class="btn btn-primary w-100" href="{% url 'add_to_carrito' p.id %}">
-                    Agregar al Carrito
-                  </a>
+              <div class="product-price fs-4 fw-bold text-success">
+                ${{ p.precio|floatformat:0|intcomma }}
+              </div>
+
+              <!-- STOCK DISPONIBLE -->
+              <div class="mb-3">
+                {% if p.stock > 0 %}
+                  <span class="badge bg-success fs-6">Stock: {{ p.stock|floatformat:0 }} {{ p.get_unidad_medida_display }}</span>
                 {% else %}
-                  <button class="btn btn-outline-dark w-100" type="button" disabled style="opacity: 0.5;">
-                    Agotado
-                  </button>
+                  <span class="badge bg-danger fs-6">Sin stock</span>
                 {% endif %}
               </div>
 
+              <!-- FORMULARIO CON CANTIDAD -->
+              <form action="{% url 'add_to_carrito' p.id %}" method="post" class="mt-auto">
+                {% csrf_token %}
+                <div class="d-flex gap-2 align-items-center mb-2">
+                  <label class="fw-bold">Cant:</label>
+                  <input type="number" name="cantidad" value="1" min="1" 
+                         max="{{ p.stock|floatformat:0 }}" class="form-control w-50 text-center"
+                         {% if p.stock <= 0 %}disabled{% endif %}>
+                </div>
+
+                {% if p.stock > 0 %}
+                  <button type="submit" class="btn btn-primary w-100">
+                    Añadir al carrito
+                  </button>
+                {% else %}
+                  <button type="button" class="btn btn-secondary w-100" disabled>
+                    Sin stock
+                  </button>
+                {% endif %}
+              </form>
             </div>
           </article>
         {% endfor %}
       {% else %}
-        <p>No hay productos disponibles.</p>
+        <div class="text-center py-5">
+          <h3>No hay productos que coincidan con tu búsqueda</h3>
+        </div>
       {% endif %}
     </section>
-
   </main>
 </div>
 {% endblock %}

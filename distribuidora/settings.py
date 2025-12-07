@@ -128,6 +128,10 @@ EMAIL_HOST_USER = 'fabriicratos10@gmail.com'
 EMAIL_HOST_PASSWORD = 'ownr xwfg tkgh uqnl'
 DEFAULT_FROM_EMAIL = 'Distribuidora Talagante <fabriicratos10@gmail.com>'
 
+
+DEFAULT_FROM_EMAIL = 'Distribuidora Talagante <no-reply@distribuidoratoralagante.cl>'
+SERVER_EMAIL = 'Distribuidora Talagante <no-reply@distribuidoratoralagante.cl>'
+
 # Configuración de Mensajes (Alertas)
 MESSAGE_TAGS = {
     messages.DEBUG: 'debug',

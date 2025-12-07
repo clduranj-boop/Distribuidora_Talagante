@@ -1,0 +1,68 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Cambiar correo de registro{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+      <div class="card shadow">
+        <div class="card-body p-5 text-center">
+          <h3 class="mb-4">Cambiar correo de registro</h3>
+          <p class="text-muted mb-4">
+            ¿Te equivocaste al poner tu correo?<br>No hay problema, cámbialo aquí.
+          </p>
+
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-3">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+
+          <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label class="form-label">Tu usuario o RUT</label>
+              <input type="text" name="identificador" id="id_identificador"
+                     class="form-control form-control-lg" 
+                     placeholder="juan123 o 11.527.103-2" required autofocus>
+              <div class="form-text">El RUT se formateará solo</div>
+            </div>
+            <div class="mb-4">
+              <label class="form-label">Nuevo correo electrónico</label>
+              <input type="email" name="nuevo_correo" class="form-control form-control-lg" 
+                     placeholder="nuevo@correo.cl" required>
+            </div>
+            <button type="submit" class="btn btn-success btn-lg w-100">
+              Enviar código al nuevo correo
+            </button>
+          </form>
+
+          <div class="mt-4">
+            <a href="{% url 'login' %}" class="text-muted small">Volver al inicio de sesión</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Formatear RUT en vivo
+document.getElementById('id_identificador')?.addEventListener('input', function(e) {
+  let valor = e.target.value.replace(/[^\dkK]/g, '').toUpperCase();
+  if (valor.length >= 8) {
+    let dv = valor.slice(-1);
+    let cuerpo = valor.slice(0, -1);
+    cuerpo = cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    e.target.value = cuerpo + '-' + dv;
+  } else {
+    e.target.value = valor;
+  }
+});
+</script>
+{% endblock %}

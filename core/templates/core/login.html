@@ -14,13 +14,13 @@
         <!-- Pestañas -->
         <ul class="nav nav-tabs mb-4" role="tablist">
           <li class="nav-item" role="presentation">
-            <button class="nav-link {% if request.GET.tab != 'register' %}active{% endif %}"
+            <button class="nav-link {% if not datos_form and request.GET.tab != 'register' %}active{% endif %}"
                     data-bs-toggle="tab" data-bs-target="#pane-login" type="button">
               Iniciar Sesión
             </button>
           </li>
           <li class="nav-item" role="presentation">
-            <button class="nav-link {% if request.GET.tab == 'register' %}active{% endif %}"
+            <button class="nav-link {% if datos_form or request.GET.tab == 'register' %}active{% endif %}"
                     data-bs-toggle="tab" data-bs-target="#pane-register" type="button">
               Crear Cuenta
             </button>
@@ -29,8 +29,8 @@
 
         <div class="tab-content">
 
-          <!-- ==================== INICIAR SESIÓN ==================== -->
-          <div id="pane-login" class="tab-pane fade {% if request.GET.tab != 'register' %}show active{% endif %}" role="tabpanel">
+          <!-- INICIAR SESIÓN -->
+        <div id="pane-login" class="tab-pane fade {% if not datos_form and request.GET.tab != 'register' %}show active{% endif %}" role="tabpanel">
             {% if error %}
               <div class="alert alert-danger alert-dismissible fade show mb-4">
                 {{ error }}
@@ -41,80 +41,114 @@
             <form method="post" action="{% url 'login' %}" class="needs-validation" novalidate>
               {% csrf_token %}
               <div class="mb-3">
-                <label class="form-label">Usuario</label>
-                <input type="text" class="form-control form-control-lg" name="username" value="{{ request.POST.username }}" required>
+                <label class="form-label fw-bold">Usuario o Correo electrónico</label>
+                <input type="text" 
+                      class="form-control form-control-lg" 
+                      name="username" 
+                      placeholder="juan123 o juan@gmail.com" 
+                      value="{{ request.POST.username|default:'' }}" 
+                      required 
+                      autocomplete="username">
+                <small class="text-muted">Puedes usar tu usuario o tu correo registrado</small>
               </div>
+              
               <div class="mb-4">
-                <label class="form-label">Contraseña</label>
+                <label class="form-label fw-bold">Contraseña</label>
                 <div class="input-group">
-                  <input type="password" class="form-control form-control-lg" name="password" required>
+                  <input type="password" 
+                        class="form-control form-control-lg" 
+                        name="password" 
+                        required 
+                        autocomplete="current-password">
                   <button type="button" class="btn btn-outline-secondary" onclick="togglePass(this)">Mostrar</button>
                 </div>
               </div>
-              <div class="d-grid">
-                <button class="btn btn-primary btn-lg" type="submit">Iniciar Sesión</button>
+              
+              <div class="d-grid mb-3">
+                <button class="btn btn-primary btn-lg fw-bold" type="submit">Iniciar Sesión</button>
               </div>
             </form>
-          </div>
 
-          <!-- ==================== REGISTRARSE ==================== -->
-          <div id="pane-register" class="tab-pane fade {% if request.GET.tab == 'register' %}show active{% endif %}" role="tabpanel">
+            <div class="text-center">
+              <a href="#" data-bs-toggle="modal" data-bs-target="#modalRecuperar" class="small text-decoration-none">
+                ¿Olvidaste tu contraseña?
+              </a>
+              <br><br>
+              <small class="text-muted">
+                ¿Te equivocaste al poner tu correo?<br>
+                <a href="{% url 'cambiar_correo_registro' %}" class="text-success">Cambiar correo aquí</a>
+              </small>
+            </div>
+        </div>
 
-            <!-- MOSTRAR TODOS LOS MENSAJES (errores y éxito) -->
+          <!-- REGISTRARSE -->
+          <div id="pane-register" class="tab-pane fade {% if datos_form or request.GET.tab == 'register' %}show active{% endif %}" role="tabpanel">
             {% if messages %}
               <div class="mb-4">
                 {% for message in messages %}
-                  <div class="alert alert-{{ message.tags|default:'danger' }} alert-dismissible fade show" role="alert">
+                  <div class="alert alert-{{ message.tags|default:'danger' }} alert-dismissible fade show">
                     <strong>
                       {% if message.tags == 'error' %}Error:{% elif message.tags == 'success' %}Éxito:{% else %}Atención:{% endif %}
                     </strong> {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                   </div>
                 {% endfor %}
               </div>
             {% endif %}
 
-            <form method="post" action="{% url 'register' %}" class="needs-validation" novalidate>
+            <form method="post" action="{% url 'register' %}" id="form-register" class="needs-validation" novalidate>
               {% csrf_token %}
-
               <div class="row g-3">
-                <!-- Usuario y Email -->
+
                 <div class="col-12 col-md-6">
                   <label class="form-label">Usuario <span class="text-danger">*</span></label>
-                  <input type="text" class="form-control form-control-lg" name="username" value="{{ request.POST.username }}" required>
-                </div>
-                <div class="col-12 col-md-6">
-                  <label class="form-label">Correo electrónico <span class="text-danger">*</span></label>
-                  <input type="email" class="form-control form-control-lg" name="email" value="{{ request.POST.email }}" required>
+                  <input type="text" class="form-control form-control-lg" name="username"
+                         value="{{ datos_form.username|default:'' }}" required>
                 </div>
 
-                <!-- Nombres -->
+                <div class="col-12 col-md-6">
+                  <label class="form-label">Correo electrónico <span class="text-danger">*</span></label>
+                  <input type="email" class="form-control form-control-lg" name="email" id="email"
+                         value="{{ datos_form.email|default:'' }}" required placeholder="tucorreo@gmail.com">
+                  <div class="invalid-feedback">Ingresa un correo real (ej: nombre@gmail.com o alumno@duocuc.cl)</div>
+                </div>
+
                 <div class="col-12 col-md-4">
                   <label class="form-label">Nombre(s) <span class="text-danger">*</span></label>
-                  <input type="text" class="form-control form-control-lg" name="nombre" value="{{ request.POST.nombre }}" required>
+                  <input type="text" class="form-control form-control-lg" name="nombre"
+                         value="{{ datos_form.nombre|default:'' }}" required>
                 </div>
                 <div class="col-12 col-md-4">
                   <label class="form-label">Apellido Paterno <span class="text-danger">*</span></label>
-                  <input type="text" class="form-control form-control-lg" name="apellido_paterno" value="{{ request.POST.apellido_paterno }}" required>
+                  <input type="text" class="form-control form-control-lg" name="apellido_paterno"
+                         value="{{ datos_form.apellido_paterno|default:'' }}" required>
                 </div>
                 <div class="col-12 col-md-4">
                   <label class="form-label">Apellido Materno</label>
-                  <input type="text" class="form-control form-control-lg" name="apellido_materno" value="{{ request.POST.apellido_materno }}">
+                  <input type="text" class="form-control form-control-lg" name="apellido_materno"
+                         value="{{ datos_form.apellido_materno|default:'' }}">
                 </div>
 
-                <!-- RUT y Teléfono -->
                 <div class="col-12 col-md-6">
                   <label class="form-label">RUT <span class="text-danger">*</span></label>
-                  <input type="text" class="form-control form-control-lg" name="rut" 
+                  <input type="text" class="form-control form-control-lg" name="rut"
+                         value="{{ datos_form.rut|default:'' }}"
                          placeholder="11.527.103-2" id="id_rut" required>
+                  <div class="form-text">Se formatea automáticamente</div>
                 </div>
 
+                <!-- TELÉFONO OBLIGATORIO Y CON VALIDACIÓN CHILENA -->
                 <div class="col-12 col-md-6">
-                  <label class="form-label">Teléfono (opcional)</label>
-                  <input type="tel" class="form-control form-control-lg" name="telefono" value="{{ request.POST.telefono }}">
+                  <label class="form-label">Teléfono <span class="text-danger">*</span></label>
+                  <div class="input-group">
+                    <span class="input-group-text">+569</span>
+                    <input type="text" class="form-control form-control-lg" name="telefono" id="telefono"
+                           value="{{ datos_form.telefono|default:'' }}" placeholder="912345678" maxlength="9" required>
+                  </div>
+                  <div class="invalid-feedback">Ingresa un número real chileno (9 dígitos, comienza con 9)</div>
+                  <small class="text-muted">Formato: 912345678 → se mostrará como +569 9123 4567</small>
                 </div>
 
-                <!-- Contraseñas -->
                 <div class="col-12 col-md-6">
                   <label class="form-label">Contraseña <span class="text-danger">*</span></label>
                   <div class="input-group">
@@ -123,17 +157,12 @@
                   </div>
                   <small class="text-muted d-block mt-1">Mínimo 8 caracteres, 1 mayúscula y 1 número</small>
                 </div>
+
                 <div class="col-12 col-md-6">
                   <label class="form-label">Repetir contraseña <span class="text-danger">*</span></label>
                   <input type="password" class="form-control form-control-lg" name="password2" required>
                 </div>
 
-                <!-- Feedback en vivo de contraseña -->
-                <div class="col-12">
-                  <div class="password-feedback mt-2 small"></div>
-                </div>
-
-                <!-- Botón -->
                 <div class="col-12 d-grid mt-4">
                   <button class="btn btn-success btn-lg" type="submit">Crear mi cuenta</button>
                 </div>
@@ -146,90 +175,150 @@
   </div>
 </div>
 
-{% block extra_script %}
-{% load static %}
-
-<!--  Mantener pestaña activa incluso al recargar -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('tab') === 'register') {
-        const tab = new bootstrap.Tab(document.querySelector('[data-bs-target="#pane-register"]'));
-        if (tab) tab.show();
-    }
-});
-</script>
-
-<!-- 2. Validaciones modulares (si usas el archivo register.js) -->
-<script type="module">
-  import { initRegisterValidation } from {% static 'core/js/validators/register.js' %};
-  
-  const registerTab = document.querySelector('[data-bs-target="#pane-register"]');
-  if (registerTab) {
-    registerTab.addEventListener('shown.bs.tab', () => initRegisterValidation());
-  }
-  if (document.querySelector('#pane-register.show')) {
-    initRegisterValidation();
-  }
-</script>
-
-<!-- 3. Mostrar/Ocultar contraseña -->
-<script>
-  function togglePass(btn) {
-    const input = btn.previousElementSibling;
-    if (input.type === 'password') {
-      input.type = 'text';
-      btn.textContent = 'Ocultar';
-    } else {
-      input.type = 'password';
-      btn.textContent = 'Mostrar';
-    }
-  }
-</script>
-
-<!-- 4. RUT: Mostrar bonito (con puntos) + Enviar limpio (11527103-2) -->
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const rutInput = document.querySelector('input[name="rut"]');
-    if (!rutInput) return;
-
-    // Mientras escribe → mostrar con puntos (bonito)
-    rutInput.addEventListener('input', function () {
-        let valor = this.value.replace(/[^\dkK]/g, '').toUpperCase();
-        if (valor.length > 1) {
-            let dv = valor.slice(-1);
-            let cuerpo = valor.slice(0, -1);
-            cuerpo = cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-            this.value = cuerpo + '-' + dv;
-        }
-    });
-
-    // ANTES DE ENVIAR → quitar puntos y enviar limpio (11527103-2)
-    rutInput.closest('form').addEventListener('submit', function () {
-        let limpio = rutInput.value.replace(/[^\dkK]/gi, '').toUpperCase();
-        if (limpio.length >= 9) {
-            rutInput.value = limpio.slice(0, -1) + '-' + limpio.slice(-1);
-        } else if (limpio.length >= 8) {
-            rutInput.value = limpio;
-        }
-    });
-});
-</script>
-
-<!-- 5. Validación de usuario (solo letras y números) -->
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const usernameInput = document.querySelector('input[name="username"]');
-    if (!usernameInput) return;
-
-    usernameInput.addEventListener('input', function () {
-        const value = this.value.trim();
-        const isValid = /^[a-zA-Z0-9]+$/.test(value);
-        this.classList.toggle('is-valid', isValid && value.length > 0);
-        this.classList.toggle('is-invalid', value.length > 0 && !isValid);
-    });
-});
-</script>
-
+<!-- MODAL RECUPERAR CONTRASEÑA -->
+<div class="modal fade" id="modalRecuperar" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form method="post" action="{% url 'recuperar_password' %}" id="formRecuperar">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title">Recuperar contraseña</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-3">Ingresa tu <strong>usuario, correo o RUT</strong>.</p>
+          <input type="text" name="email_o_usuario" id="inputRecuperar"
+                 class="form-control form-control-lg" placeholder="juan123 o 11.527.103-2" required>
+          <div class="form-text mt-2">El RUT se formatea solo</div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-success">Enviar enlace</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 {% endblock %}
+
+{% block extra_script %}
+<script>
+// VALIDACIÓN DE CORREO REAL (CHILE 2025)
+function esCorreoValido(email) {
+  if (!email || !email.includes('@') || email.endsWith('@') || email.startsWith('@')) return false;
+  const dominio = email.toLowerCase().trim().split('@')[1];
+
+  if (dominio.endsWith('.cl')) return true;
+
+  const reales = ['gmail.com','googlemail.com','hotmail.com','outlook.com','live.com','yahoo.com','yahoo.es','icloud.com','me.com','protonmail.com','zoho.com'];
+  if (reales.includes(dominio)) return true;
+
+  const partes = dominio.split('.');
+  if (partes.length >= 2) {
+    const tld = partes[partes.length - 1];
+    const dom = partes[partes.length - 2];
+    if (['com','net','org','shop','store','cl'].includes(tld) && dom.length >= 2) return true;
+  }
+  return false;
+}
+
+// VALIDACIÓN Y FORMATEO DE TELÉFONO CHILENO
+function esTelefonoValido(tel) {
+  const soloNumeros = tel.replace(/\D/g, '');
+  return soloNumeros.length === 9 && soloNumeros.startsWith('9');
+}
+
+function formatearTelefono() {
+  const input = document.getElementById('telefono');
+  let valor = input.value.replace(/\D/g, '');
+  if (valor.length > 9) valor = valor.slice(0, 9);
+  if (valor.startsWith('9') && valor.length === 9) {
+    input.value = valor.replace(/(\d{4})(\d{4})/, '$1 $2');
+  } else {
+    input.value = valor;
+  }
+}
+
+// Aplicar validaciones
+document.addEventListener('DOMContentLoaded', function() {
+  const emailInput = document.getElementById('email');
+  const telefonoInput = document.getElementById('telefono');
+  const form = document.getElementById('form-register');
+
+  // Correo
+  function validarCorreo() {
+    const valido = emailInput.value === '' || esCorreoValido(emailInput.value);
+    emailInput.classList.toggle('is-invalid', !valido && emailInput.value !== '');
+    emailInput.classList.toggle('is-valid', valido && emailInput.value !== '');
+  }
+  emailInput.addEventListener('input', validarCorreo);
+  emailInput.addEventListener('blur', validarCorreo);
+
+  // Teléfono
+  telefonoInput.addEventListener('input', function() {
+    formatearTelefono();
+    const valido = esTelefonoValido(this.value);
+    this.classList.toggle('is-invalid', !valido && this.value !== '');
+    this.classList.toggle('is-valid', valido);
+  });
+
+  // Al enviar formulario
+  form.addEventListener('submit', function(e) {
+    let error = false;
+
+    // Validar correo
+    if (!esCorreoValido(emailInput.value)) {
+      emailInput.classList.add('is-invalid');
+      error = true;
+    }
+
+    // Validar teléfono
+    if (!esTelefonoValido(telefonoInput.value)) {
+      telefonoInput.classList.add('is-invalid');
+      error = true;
+    }
+
+    if (error) {
+      e.preventDefault();
+      alert('Por favor corrige los campos en rojo:\n• Usa un correo real\n• Teléfono debe ser chileno real (+569 XXXX XXXX)');
+      return false;
+    }
+  });
+
+  // Mantener pestaña activa
+  if (new URLSearchParams(window.location.search).get('tab') === 'register' || "{{ datos_form|default:'' }}" !== "") {
+    const tab = document.querySelector('[data-bs-target="#pane-register"]');
+    if (tab) new bootstrap.Tab(tab).show();
+  }
+});
+
+// Toggle contraseña
+function togglePass(btn) {
+  const input = btn.previousElementSibling;
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.textContent = 'Ocultar';
+  } else {
+    input.type = 'password';
+    btn.textContent = 'Mostrar';
+  }
+}
+
+// Formateo RUT
+['#id_rut', '#inputRecuperar'].forEach(sel => {
+  const el = document.querySelector(sel);
+  if (el) {
+    el.addEventListener('input', function() {
+      let v = this.value.replace(/[^\dkK]/g, '').toUpperCase();
+      if (v.length >= 8) {
+        let dv = v.slice(-1);
+        let cuerpo = v.slice(0, -1).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        this.value = cuerpo + '-' + dv;
+      } else {
+        this.value = v;
+      }
+    });
+  }
+});
+</script>
 {% endblock %}

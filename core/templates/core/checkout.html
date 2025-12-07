@@ -1,52 +1,45 @@
 ﻿{% extends "core/base.html" %}
-{% load static %}
+{% load static humanize %}
 {% load mathfilters %}
 
-{% block title %}Finalizar Compra{% endblock %}
+{% block title %}Finalizar Compra — Distribuidora Talagante{% endblock %}
 
 {% block content %}
 <div class="checkout-page animate-fade-in">
     <div class="container py-5">
-        
         <div class="text-center mb-5">
             <h1 class="display-5 fw-bold mb-2" style="color: #1a1a1a;">
-                <i class="bi bi-cart-check-fill me-3" style="color: var(--color-primary);"></i>Finalizar Compra
+                Finalizar Compra
             </h1>
-            <p class="lead text-muted">Revisa tu pedido y selecciona cómo pagar.</p>
+            <p class="lead text-muted">Revisa tu pedido y confirma los detalles.</p>
         </div>
 
         <div class="row g-5">
-            
+            <!-- RESUMEN DE PRODUCTOS -->
             <div class="col-lg-6">
                 <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
                     <div class="card-header bg-dark text-white py-3">
-                        <h4 class="mb-0 fw-bold fs-5">
-                            <i class="bi bi-bag-fill me-2 opacity-50"></i>Tu Pedido
-                        </h4>
+                        <h4 class="mb-0 fw-bold fs-5">Tu Pedido</h4>
                     </div>
-                    
                     <div class="card-body p-0">
                         <div class="products-scroll px-4 py-3 bg-white">
                             {% for item in items %}
                             <div class="d-flex align-items-center mb-3 pb-3 border-bottom border-light">
                                 <div class="flex-shrink-0">
                                     {% if item.producto.imagen %}
-                                        <img src="{{ item.producto.imagen.url }}" alt="{{ item.producto.nombre }}" 
-                                             class="rounded-3 border" style="width: 60px; height: 60px; object-fit: cover;">
+                                        <img src="{{ item.producto.imagen.url }}" class="rounded-3 border" style="width: 60px; height: 60px; object-fit: cover;">
                                     {% else %}
                                         <div class="rounded-3 border bg-light d-flex align-items-center justify-content-center text-muted" style="width: 60px; height: 60px;">
                                             <i class="bi bi-box-seam fs-4"></i>
                                         </div>
                                     {% endif %}
                                 </div>
-                                
                                 <div class="flex-grow-1 ms-3">
                                     <h6 class="mb-1 fw-bold text-dark">{{ item.producto.nombre }}</h6>
                                     <small class="text-muted fw-semibold">x {{ item.cantidad }}</small>
                                 </div>
-                                
                                 <div class="text-end">
-                                    <span class="fw-bold text-dark">${{ item.cantidad|mul:item.producto.precio|floatformat:0 }}</span>
+                                    <span class="fw-bold text-dark">${{ item.cantidad|mul:item.producto.precio|floatformat:0|intcomma }}</span>
                                 </div>
                             </div>
                             {% endfor %}
@@ -55,35 +48,88 @@
                         <div class="bg-light px-4 py-4 border-top">
                             <div class="d-flex justify-content-between mb-2 text-muted fw-medium">
                                 <span>Subtotal</span>
-                                <span>${{ total|floatformat:0 }}</span>
+                                <span>${{ total|floatformat:0|intcomma }}</span>
                             </div>
-                            <div class="d-flex justify-content-between mb-4 text-muted fw-medium">
+                            <div class="d-flex justify-content-between mb-4 text-success fw-bold">
                                 <span>Envío</span>
-                                <span class="fst-italic">Por calcular</span>
+                                <span id="texto_envio">Retiro en local – GRATIS</span>
                             </div>
                             <div class="d-flex justify-content-between align-items-center pt-3 border-top border-secondary">
                                 <span class="fs-4 fw-bold text-dark">Total a Pagar</span>
-                                <span class="fs-2 fw-bolder" style="color: var(--color-primary);">${{ total|floatformat:0 }}</span>
+                                <span class="fs-2 fw-bolder" style="color: var(--color-primary);" id="total_final">${{ total|floatformat:0|intcomma }}</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <!-- ENVÍO + PAGO -->
             <div class="col-lg-6">
-                <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
-                    <div class="card-header bg-dark text-white py-3">
-                        <h4 class="mb-0 fw-bold fs-5">
-                            <i class="bi bi-credit-card-2-front-fill me-2 opacity-50"></i>Método de Pago
-                        </h4>
-                    </div>
-                    
-                    <div class="card-body p-4 bg-white">
-                        <form method="post" enctype="multipart/form-data" id="payment-form">
-                            {% csrf_token %}
+                <form method="post" enctype="multipart/form-data" id="form_checkout">
+                    {% csrf_token %}
 
+                    <!-- ENVÍO O RETIRO -->
+                    <div class="card border-0 shadow-lg rounded-4 mb-4">
+                        <div class="card-header bg-primary text-white py-3">
+                            <h5 class="mb-0 fw-bold">¿Cómo recibes tu pedido?</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="payment-card-option animate-hover" for="retiro">
+                                        <input type="radio" name="metodo_envio" value="retiro" id="retiro" checked>
+                                        <div class="card-content shadow-sm p-3 text-center">
+                                            <i class="bi bi-shop fs-1 text-success mb-2"></i>
+                                            <div class="fw-bold">Retiro en Local</div>
+                                            <div class="badge bg-success mt-2">GRATIS</div>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="col-12">
+                                    <label class="payment-card-option animate-hover" for="domicilio">
+                                        <input type="radio" name="metodo_envio" value="domicilio" id="domicilio">
+                                        <div class="card-content shadow-sm p-3 text-center">
+                                            <i class="bi bi-truck fs-1 text-primary mb-2"></i>
+                                            <div class="fw-bold">Envío a Domicilio</div>
+                                            <div class="small text-muted">Desde $2.500</div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- BLOQUE DIRECCIÓN (solo visible si elige envío) -->
+                            <div id="bloque_direccion" style="display:none;" class="mt-4 p-5 bg-success text-white rounded-4 text-center">
+                                <h5 class="fw-bold mb-4">¡Perfecto! Selecciona tu comuna</h5>
+                                <div class="row justify-content-center">
+                                    <div class="col-md-8">
+                                        <select name="comuna" id="select_comuna" class="form-select form-select-lg mb-4">
+                                            <option value="">→ Elige tu comuna</option>
+                                            {% for val, texto in comunas_rm %}
+                                            <option value="{{ val }}">{{ texto }}</option>
+                                            {% endfor %}
+                                        </select>
+
+                                        <div class="bg-white text-dark p-4 rounded shadow">
+                                            <p class="mb-3 fw-bold">
+                                                Te contactaremos por WhatsApp para confirmar la dirección exacta
+                                            </p>
+                                            <a href="https://wa.me/56949071013" target="_blank" class="btn btn-success btn-lg">
+                                                Abrir WhatsApp
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MÉTODO DE PAGO -->
+                    <div class="card border-0 shadow-lg rounded-4">
+                        <div class="card-header bg-dark text-white py-3">
+                            <h5 class="mb-0 fw-bold">Método de Pago</h5>
+                        </div>
+                        <div class="card-body">
                             <div class="payment-options-grid mb-4">
-                                
                                 <label class="payment-card-option animate-hover" for="transferencia">
                                     <input type="radio" name="metodo_pago" value="transferencia" id="transferencia" checked>
                                     <div class="card-content shadow-sm">
@@ -113,65 +159,115 @@
                                 </label>
                             </div>
 
-                            <div id="seccion-transferencia" class="mb-4 animate-fade-in-up">
+                            <!-- SECCIÓN COMPROBANTE (solo visible si elige transferencia) -->
+                            <div id="seccion-transferencia" class="mb-4">
                                 <div class="alert bg-light border-0 shadow-sm mb-3">
                                     <h6 class="fw-bold mb-3" style="color: var(--color-primary);">
-                                        <i class="bi bi-info-circle-fill me-2"></i>Datos Bancarios
+                                        Datos Bancarios
                                     </h6>
                                     <ul class="list-unstyled mb-0 small fw-medium text-dark">
-                                        <li class="mb-1"><strong>Banco:</strong> Banco Estado</li>
-                                        <li class="mb-1"><strong>Tipo:</strong> Cuenta Corriente</li>
-                                        <li class="mb-1"><strong>N° Cuenta:</strong> 123-456-789</li>
-                                        <li class="mb-1"><strong>RUT:</strong> 77.777.777-7</li>
-                                        <li class="mb-0"><strong>Correo:</strong> pagos@talagante.cl</li>
+                                        <li><strong>Banco:</strong> Banco Estado</li>
+                                        <li><strong>Tipo:</strong> Cuenta Corriente</li>
+                                        <li><strong>N° Cuenta:</strong> 123-456-789</li>
+                                        <li><strong>RUT:</strong> 77.777.777-7</li>
+                                        <li><strong>Correo:</strong> pagos@talagante.cl</li>
                                     </ul>
                                 </div>
-                                
-                                <div class="mb-3">
-                                    <label class="form-label fw-bold small text-uppercase text-muted">Subir Comprobante <span class="text-danger">*</span></label>
-                                    <input type="file" name="comprobante" id="comprobante" class="form-control" accept="image/*" required>
-                                </div>
+                                <input type="file" name="comprobante" class="form-control" accept="image/*">
+                                <small class="text-muted">Sube captura del comprobante de transferencia</small>
                             </div>
 
-                            <div class="mb-4">
-                                <label class="form-label fw-bold small text-uppercase text-muted">Nota Adicional</label>
-                                <textarea name="mensaje" class="form-control" rows="2" placeholder="Ej: Pasaré a retirar a las 16:00"></textarea>
-                            </div>
+                            <textarea name="mensaje" class="form-control mb-3" rows="2" placeholder="Mensaje adicional (opcional)"></textarea>
 
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-primary btn-lg py-3 fs-5 fw-bold rounded-pill shadow-lg btn-confirmar animate-pulse">
-                                    <i class="bi bi-check2-circle me-2"></i>CONFIRMAR PEDIDO
-                                </button>
-                            </div>
-                        </form>
+                            <button type="submit" class="btn btn-primary btn-lg w-100 py-3 fs-5 fw-bold rounded-pill shadow-lg">
+                                CONFIRMAR PEDIDO
+                            </button>
+                        </div>
                     </div>
-                </div>
+                </form>
             </div>
-
         </div>
     </div>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const transf = document.getElementById('transferencia');
-    const efec = document.getElementById('efectivo');
-    const secTransf = document.getElementById('seccion-transferencia');
-    const inpFile = document.getElementById('comprobante');
+// Variables y zonas
+const SUBTOTAL = parseInt("{{ total|default:'0' }}") || 0;
+const ZONAS_TALAGANTE = ['talagante', 'penaflor', 'isla_de_maipo', 'el_monte', 'padre_hurtado'];
 
-    function toggle() {
-        if (transf.checked) {
-            secTransf.style.display = 'block';
-            inpFile.required = true;
-        } else {
-            secTransf.style.display = 'none';
-            inpFile.required = false;
-            inpFile.value = '';
-        }
+function toggleDireccion() {
+    const esEnvio = document.getElementById('domicilio').checked;
+    const bloque = document.getElementById('bloque_direccion');
+    const selectComuna = document.getElementById('select_comuna');
+
+    bloque.style.display = esEnvio ? 'block' : 'none';
+
+    if (esEnvio) {
+        selectComuna.setAttribute('required', 'required');
+    } else {
+        selectComuna.removeAttribute('required');
+        selectComuna.value = '';
     }
-    transf.addEventListener('change', toggle);
-    efec.addEventListener('change', toggle);
-    toggle();
+
+    actualizarEnvio();
+}
+
+function actualizarEnvio() {
+    const esEnvio = document.getElementById('domicilio').checked;
+    const comuna = document.getElementById('select_comuna')?.value || '';
+    let texto = "Retiro en local – GRATIS";
+    let costo = 0;
+
+    if (esEnvio && comuna) {
+        if (ZONAS_TALAGANTE.includes(comuna)) {
+            texto = "Envío a zona cercana – $2.500";
+            costo = 2500;
+        } else if (SUBTOTAL >= 40000) {
+            texto = "Envío GRATIS (compra ≥ $40.000)";
+            costo = 0;
+        } else {
+            texto = "Envío Región Metropolitana – $4.500";
+            costo = 4500;
+        }
+    } else if (esEnvio && !comuna) {
+        texto = "Selecciona tu comuna para ver el costo";
+    }
+
+    document.getElementById('texto_envio').textContent = texto;
+    document.getElementById('total_final').textContent = "$" + (SUBTOTAL + costo).toLocaleString('es-CL');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Control envío / retiro
+    document.querySelectorAll('input[name="metodo_envio"]').forEach(r => r.addEventListener('change', toggleDireccion));
+
+    // Cuando cambie la comuna
+    document.getElementById('select_comuna')?.addEventListener('change', actualizarEnvio);
+
+    // Control método de pago
+    document.querySelectorAll('input[name="metodo_pago"]').forEach(r => {
+        r.addEventListener('change', () => {
+            const seccion = document.getElementById('seccion-transferencia');
+            const inputFile = seccion.querySelector('input[type="file"]');
+
+            if (r.value === 'transferencia') {
+                seccion.style.display = 'block';
+                inputFile.setAttribute('required', 'required');
+            } else {
+                seccion.style.display = 'none';
+                inputFile.removeAttribute('required');
+                inputFile.value = ''; // limpiar archivo seleccionado
+            }
+        });
+    });
+
+    // Inicializar todo correctamente
+    toggleDireccion();
+    actualizarEnvio();
+
+    // Trigger inicial del método de pago (por si carga con efectivo seleccionado)
+    const metodoPagoActual = document.querySelector('input[name="metodo_pago"]:checked');
+    if (metodoPagoActual) metodoPagoActual.dispatchEvent(new Event('change'));
 });
 </script>
 {% endblock %}

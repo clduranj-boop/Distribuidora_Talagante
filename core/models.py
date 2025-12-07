@@ -1,4 +1,5 @@
-﻿from django.db import models
+﻿import re
+from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import RegexValidator
 from django.utils import timezone
@@ -6,6 +7,8 @@ from decimal import Decimal
 import datetime
 from datetime import timedelta
 import random
+
+
 
 
 class Perfil(models.Model):
@@ -21,6 +24,9 @@ class Perfil(models.Model):
     )
     telefono = models.CharField(max_length=15, blank=True, null=True)
     es_admin = models.BooleanField(default=False)
+
+    temp_token = models.CharField(max_length=100, blank=True, null=True)
+    token_expira = models.DateTimeField(blank=True, null=True)
 
     def nombre_completo(self):
         if self.apellido_materno:
@@ -145,6 +151,21 @@ class Orden(models.Model):
 
     mensaje_cliente = models.TextField(blank=True, help_text="Mensaje opcional del cliente")
 
+    def get_whatsapp_link(self):
+        """Devuelve link directo a WhatsApp con el número del cliente"""
+        if hasattr(self.usuario, 'perfil') and self.usuario.perfil.telefono:
+            # Limpia el número: quita espacios, +, etc.
+            telefono = re.sub(r'[^\d]', '', self.usuario.perfil.telefono)
+            if telefono.startswith('56') and len(telefono) == 11:
+                telefono = telefono[2:]  
+            elif len(telefono) == 9:
+                telefono = '56' + telefono  
+            else:
+                telefono = telefono.lstrip('0')
+            
+            return f"https://wa.me/{telefono}"
+        return "https://wa.me/56949071013"  
+
     def __str__(self):
         return f"Orden #{self.id} - {self.usuario.username}"
 
@@ -154,6 +175,20 @@ class Orden(models.Model):
         if self.estado == 'cancelado':
             for item in self.itemorden_set.all():
                 item.producto.agregar_stock(item.cantidad)
+
+    ###Si el administrador cancela la orden de checkout, el stock se renueva aca
+    def save(self, *args, **kwargs):
+        # Si se cambia a cancelado o completado, y antes no lo estaba
+        if self.pk is not None:
+            old = Orden.objects.get(pk=self.pk)
+            if old.estado not in ['cancelado', 'completado'] and self.estado in ['cancelado', 'completado']:
+                # Devolver stock
+                for item in self.itemorden_set.all():
+                    item.producto.stock += item.cantidad
+                    item.producto.save()
+        super().save(*args, **kwargs)
+
+            
 
 
 class ItemOrden(models.Model):
@@ -188,3 +223,66 @@ class CodigoVerificacion(models.Model):
 
     def es_valido(self):
         return not self.expirado and timezone.now() < self.creado_en + timedelta(minutes=10)
+    
+
+
+
+  # TODAS LAS COMUNAS RM (52)
+COMUNAS_RM = [
+    ('Alhué', 'Alhué'), ('Buin', 'Buin'), ('Calera de Tango', 'Calera de Tango'),
+    ('Cerrillos', 'Cerrillos'), ('Cerro Navia', 'Cerro Navia'), ('Colina', 'Colina'),
+    ('Conchalí', 'Conchalí'), ('Curacaví', 'Curacaví'), ('El Bosque', 'El Bosque'),
+    ('El Monte', 'El Monte'), ('Estación Central', 'Estación Central'),
+    ('Huechuraba', 'Huechuraba'), ('Independencia', 'Independencia'),
+    ('Isla de Maipo', 'Isla de Maipo'), ('La Cisterna', 'La Cisterna'),
+    ('La Florida', 'La Florida'), ('La Granja', 'La Granja'), ('La Pintana', 'La Pintana'),
+    ('La Reina', 'La Reina'), ('Las Condes', 'Las Condes'), ('Lo Barnechea', 'Lo Barnechea'),
+    ('Lo Espejo', 'Lo Espejo'), ('Lo Prado', 'Lo Prado'), ('Macul', 'Macul'),
+    ('Maipú', 'Maipú'), ('María Pinto', 'María Pinto'), ('Melipilla', 'Melipilla'),
+    ('Ñuñoa', 'Ñuñoa'), ('Padre Hurtado', 'Padre Hurtado'), ('Paine', 'Paine'),
+    ('Pedro Aguirre Cerda', 'Pedro Aguirre Cerda'), ('Peñaflor', 'Peñaflor'),
+    ('Peñalolén', 'Peñalolén'), ('Pirque', 'Pirque'), ('Providencia', 'Providencia'),
+    ('Pudahuel', 'Pudahuel'), ('Puente Alto', 'Puente Alto'), ('Quilicura', 'Quilicura'),
+    ('Quinta Normal', 'Quinta Normal'), ('Recoleta', 'Recoleta'), ('Renca', 'Renca'),
+    ('San Bernardo', 'San Bernardo'), ('San Joaquín', 'San Joaquín'),
+    ('San José de Maipo', 'San José de Maipo'), ('San Miguel', 'San Miguel'),
+    ('San Pedro', 'San Pedro'), ('San Ramón', 'San Ramón'), ('Santiago', 'Santiago'),
+    ('Talagante', 'Talagante'), ('Til Til', 'Til Til'), ('Vitacura', 'Vitacura'),
+]
+
+# 1. DIRECCIONES GUARDADAS DEL CLIENTE (para usar después)
+class DireccionGuardada(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='direcciones')
+    nombre = models.CharField("Ej: Casa, Trabajo, Mamá", max_length=100)
+    calle = models.CharField("Calle", max_length=200)
+    numero = models.CharField("Número / Depto", max_length=50, blank=True, null=True)
+    comuna = models.CharField(max_length=100, choices=COMUNAS_RM)
+    notas = models.TextField("Indicaciones", blank=True, null=True)
+    predeterminada = models.BooleanField("Predeterminada", default=False)
+
+    def save(self, *args, **kwargs):
+        if self.predeterminada:
+            DireccionGuardada.objects.filter(usuario=self.usuario).update(predeterminada=False)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.nombre} - {self.comuna}"
+
+# 2. DIRECCIÓN DEL PEDIDO (una por orden)
+class DireccionEnvio(models.Model):
+    orden = models.OneToOneField('Orden', on_delete=models.CASCADE, related_name='direccion_envio')    
+    METODO_CHOICES = [
+        ('retiro', 'Retiro en local'),
+        ('domicilio', 'Envío a domicilio'),
+    ]
+    metodo = models.CharField(max_length=20, choices=METODO_CHOICES, default='retiro')
+    
+    calle = models.CharField(max_length=200, blank=True, null=True)
+    numero = models.CharField(max_length=50, blank=True, null=True)
+    comuna = models.CharField(max_length=100, choices=COMUNAS_RM, blank=True, null=True)
+    notas = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        if self.metodo == 'retiro':
+            return "Retiro en local"
+        return f"{self.calle} {self.numero}, {self.get_comuna_display()}"
