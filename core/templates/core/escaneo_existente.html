@@ -4,61 +4,171 @@
 {% block title %}Ajustar Stock - {{ producto.nombre }}{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="card shadow-lg border-0 rounded-4" style="max-width: 1000px; margin: 0 auto;">
+<style>
+    body {
+        background: linear-gradient(135deg, #141e30, #243b55);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .card-stock {
+        background: rgba(15, 23, 42, 0.95);
+        border: 8px solid #00d4ff;
+        border-radius: 50px;
+        max-width: 1100px;
+        width: 100%;
+        box-shadow: 0 30px 100px rgba(0, 212, 255, 0.4);
+        overflow: hidden;
+        backdrop-filter: blur(15px);
+    }
+
+    .header-stock {
+        background: linear-gradient(45deg, #00d4ff, #007bff);
+        padding: 40px;
+        text-align: center;
+        color: white;
+    }
+
+    .producto-nombre {
+        font-size: 3.5rem;
+        font-weight: 900;
+        text-shadow: 0 5px 20px rgba(0,0,0,0.6);
+        letter-spacing: 3px;
+    }
+
+    .stock-actual {
+        font-size: 6rem;
+        font-weight: 900;
+        color: #00ff9d;
+        text-shadow: 0 0 30px #00ff9d;
+        margin: 20px 0;
+    }
+
+    .unidad {
+        font-size: 3rem;
+        color: #a0f0d0;
+    }
+
+    .btn-gigante {
+        width: 150px;
+        height: 150px;
+        font-size: 4rem !important;
+        font-weight: bold;
+        border-radius: 50%;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+        transition: all 0.3s ease;
+    }
+
+    .btn-gigante:hover {
+        transform: scale(1.15);
+        box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+    }
+
+    .input-cantidad {
+        height: 180px;
+        font-size: 5rem !important;
+        font-weight: bold;
+        text-align: center;
+        border: 10px solid #00d4ff;
+        border-radius: 40px;
+        background: white;
+        color: #000;
+    }
+
+    .btn-volver-escaneo {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 9999;
+        font-size: 1.5rem;
+        padding: 20px 50px;
+        border-radius: 50px;
+    }
+
+    .glow-text {
+        color: #00ffff;
+        text-shadow: 0 0 20px #00ffff;
+    }
+</style>
+
+<div class="container-fluid p-0">
+    <div class="card-stock mx-auto">
         <!-- Header -->
-        <div class="card-header bg-primary text-white text-center py-4">
-            <h2 class="mb-0 fw-bold fs-3">{{ producto.nombre }}</h2>
+        <div class="header-stock">
+            <h1 class="producto-nombre text-uppercase">{{ producto.nombre }}</h1>
             {% if producto.imagen %}
-                <img src="{{ producto.imagen.url }}" class="img-fluid rounded mt-3" style="max-height: 140px;">
+                <img src="{{ producto.imagen.url }}" class="img-fluid rounded mt-3" style="max-height: 250px; border: 6px solid white;">
             {% endif %}
         </div>
 
         <!-- Stock actual -->
-        <div class="text-center py-4 bg-dark text-white">
-            <p class="mb-2 fs-5 opacity-75">Stock actual</p>
-            <h1 class="display-4 fw-bold text-success mb-0">
-                {{ producto.stock }} <small class="fs-4">{{ producto.unidad_medida }}</small>
-            </h1>
+        <div class="text-center py-5 bg-dark">
+            <p class="mb-2 fs-3 text-white opacity-75">Stock Actual</p>
+            <div class="stock-actual">{{ producto.stock }}</div>
+            <div class="unidad">{{ producto.unidad_medida }}</div>
         </div>
 
-        <!-- Formulario en una sola fila -->
-        <div class="card-body p-5">
-            <form method="post" class="text-center">
+        <!-- Formulario de ajuste -->
+        <div class="p-5">
+            <form method="post">
                 {% csrf_token %}
                 <input type="hidden" name="codigo_barras" value="{{ producto.codigo_barras }}">
                 <input type="hidden" name="accion" value="confirmar">
 
-                <div class="d-flex flex-wrap justify-content-center align-items-center gap-3">
-
+                <div class="row g-4 justify-content-center align-items-center">
                     <!-- RESTAR -->
-                    <button type="submit" name="cantidad" value="-10" class="btn btn-danger btn-lg px-4 py-3 fs-4 fw-bold">−10</button>
-                    <button type="submit" name="cantidad" value="-5" class="btn btn-danger btn-lg px-4 py-3 fs-4 fw-bold">−5</button>
-                    <button type="submit" name="cantidad" value="-1" class="btn btn-outline-danger btn-lg px-4 py-3 fs-4 fw-bold">−1</button>
+                    <div class="col-3 col-md-2">
+                        <button type="submit" name="cantidad" value="-10" class="btn btn-danger btn-gigante">−10</button>
+                    </div>
+                    <div class="col-3 col-md-2">
+                        <button type="submit" name="cantidad" value="-5" class="btn btn-danger btn-gigante">−5</button>
+                    </div>
+                    <div class="col-3 col-md-2">
+                        <button type="submit" name="cantidad" value="-1" class="btn btn-warning btn-gigante">−1</button>
+                    </div>
 
-                    <!-- Input cantidad -->
-                    <input type="number" name="cantidad" class="form-control form-control-lg text-center mx-3" 
-                           style="width: 180px; font-size: 2rem; font-weight: bold;" 
-                           placeholder="0" step="any" autofocus>
+                    <!-- CANTIDAD PERSONALIZADA -->
+                    <div class="col-12 col-md-3">
+                        <input type="number" name="cantidad" class="form-control input-cantidad" 
+                               placeholder="0" step="any" autofocus>
+                    </div>
 
                     <!-- SUMAR -->
-                    <button type="submit" name="cantidad" value="1" class="btn btn-outline-success btn-lg px-4 py-3 fs-4 fw-bold">+1</button>
-                    <button type="submit" name="cantidad" value="5" class="btn btn-success btn-lg px-4 py-3 fs-4 fw-bold">+5</button>
-                    <button type="submit" name="cantidad" value="10" class="btn btn-success btn-lg px-4 py-3 fs-4 fw-bold">+10</button>
+                    <div class="col-3 col-md-2">
+                        <button type="submit" name="cantidad" value="1" class="btn btn-success btn-gigante">+1</button>
+                    </div>
+                    <div class="col-3 col-md-2">
+                        <button type="submit" name="cantidad" value="5" class="btn btn-success btn-gigante">+5</button>
+                    </div>
+                    <div class="col-3 col-md-2">
+                        <button type="submit" name="cantidad" value="10" class="btn btn-success btn-gigante">+10</button>
+                    </div>
                 </div>
 
-                <div class="mt-4 text-muted">
-                    <small>Negativo = restar · Positivo = sumar</small>
+                <div class="text-center mt-5">
+                    <p class="fs-2 text-white glow-text">
+                        <strong>Negativo = RESTAR</strong>   |   <strong>Positivo = SUMAR</strong>
+                    </p>
                 </div>
             </form>
         </div>
-
-        <!-- Footer con volver -->
-        <div class="card-footer text-center py-4">
-            <a href="{% url 'escaneo_rapido' %}" class="btn btn-secondary btn-lg px-5">
-                ← Volver a escanear
-            </a>
-        </div>
     </div>
+
+    <!-- Botón volver al escáner (abajo centrado) -->
+    <a href="{% url 'escaneo_rapido' %}" class="btn btn-light btn-lg btn-volver-escaneo shadow-lg">
+        Volver a Escanear
+    </a>
 </div>
+
+<!-- Sonido confirmación -->
+<audio id="beep-success" src="{% static 'beep-success.mp3' %}" preload="auto"></audio>
+
+<script>
+// Sonido al cargar (opcional)
+document.getElementById('beep-success')?.play();
+</script>
 {% endblock %}
