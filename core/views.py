@@ -45,6 +45,7 @@ from .models import Producto
 from .forms import EscaneoEntradaForm, ProductoRapidoForm
 from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
+from .models import Banner
 
 
 
@@ -66,11 +67,16 @@ def is_superuser(user):
 
 #Vistas
 def home(request):
+    
+    banners = Banner.objects.filter(activo=True).order_by('orden')
+
+    
     productos_destacados = Producto.objects.filter(activo=True).order_by('?')[:4]
     
     context = {
         'mensaje': 'Bienvenido a Distribuidora Talagante',
-        'productos': productos_destacados
+        'productos': productos_destacados,
+        'banners': banners  
     }
     return render(request, 'core/home.html', context)
 
