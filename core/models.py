@@ -286,3 +286,13 @@ class DireccionEnvio(models.Model):
         if self.metodo == 'retiro':
             return "Retiro en local"
         return f"{self.calle} {self.numero}, {self.get_comuna_display()}"
+
+ # MODELO PARA EL CARRUSEL (BANNER) ---
+class Banner(models.Model):
+    titulo = models.CharField(max_length=100, help_text="Texto alternativo para la imagen")
+    imagen = models.ImageField(upload_to='banners/') 
+    activo = models.BooleanField(default=True)
+    orden = models.IntegerField(default=0, help_text="0 aparece primero, 1 segundo, etc.")
+
+    def __str__(self):
+        return self.titulo
