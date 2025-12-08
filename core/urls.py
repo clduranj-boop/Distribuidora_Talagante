@@ -7,6 +7,7 @@ from django.urls import path
 from . import views
 from .views import CrearOrdenView
 urlpatterns = [
+    path('sistema/', admin.site.urls),
     path('', views.home, name='home'),
     path('catalogo/', views.catalogo, name='catalogo'),
     path('carrito/', views.carrito, name='carrito'),
