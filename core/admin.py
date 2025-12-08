@@ -8,3 +8,8 @@ admin.site.register(ItemCarrito)
 admin.site.register(Orden)
 admin.site.register(ItemOrden)
 admin.site.register(ConfiguracionHome)
+
+@admin.register(Banner)
+class BannerAdmin(admin.ModelAdmin):
+    list_display = ('titulo', 'activo', 'orden')
+    list_editable = ('activo', 'orden')
