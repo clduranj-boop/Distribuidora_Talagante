@@ -63,10 +63,9 @@ import random
 def is_superuser(user):
     return user.is_superuser
 
-# Vistas existentes de tu proyecto
+
+#Vistas
 def home(request):
-    # Obtener 4 productos aleatorios para mostrar en el home
-    # El '?' ordena aleatoriamente (random)
     productos_destacados = Producto.objects.filter(activo=True).order_by('?')[:4]
     
     context = {
@@ -167,7 +166,7 @@ def verificar_codigo(request):
     return render(request, 'core/verificar_codigo.html')
 
 
-# Lista de dominios temporales (actualizada 2025)
+# Lista de dominios temporales
 DOMINIOS_TEMPORALES = {
     '10minutemail.com', 'tempmail.org', 'guerrillamail.com', 'mailinator.com',
     'yopmail.com', 'disposablemail.com', 'throwawaymail.com', 'sharklasers.com',
@@ -194,7 +193,7 @@ def validar_correo_real(email: str):
     if dominio in DOMINIOS_TEMPORALES:
         raise ValidationError("No se permiten correos temporales.")
 
-    # 4. Validación simple pero efectiva: intentar conectar al puerto 25 (SMTP)
+    # 4. Validación simple: intentar conectar al puerto 25 (SMTP)
     # Esto funciona en el 98% de los casos sin instalar nada
     try:
         socket.create_connection((dominio, 25), timeout=5)
@@ -204,7 +203,6 @@ def validar_correo_real(email: str):
         raise ValidationError("Este correo no parece real. Usa uno válido (Gmail, Hotmail, empresa, etc.).")
 
 def register(request):
-    # Guardamos los datos del POST para rellenar de nuevo si hay error
     datos_form = request.POST if request.method == "POST" else {}
 
     if request.method == 'POST':
@@ -232,6 +230,8 @@ def register(request):
         # ==================== VALIDACIONES ====================
         errores = False
 
+        
+        
         if not all([username, email, password1, password2, nombre, apellido_paterno, rut]):
             messages.error(request, "Todos los campos obligatorios deben estar completos.")
             errores = True
@@ -382,7 +382,7 @@ def checkout(request):
                 estado='confirmacion' if comprobante else 'pendiente'
             )
 
-            # === AQUÍ ESTÁ LA CLAVE: DESCONTAR STOCK ===
+            # === DESCONTAR STOCK ===
             for item in items:
                 if item.cantidad > item.producto.stock:
                     messages.error(request, f"No hay suficiente stock de {item.producto.nombre}")
@@ -436,8 +436,8 @@ def checkout(request):
             # Limpiar carrito
             carrito.itemcarrito_set.all().delete()
 
-        # === CORREOS (igual que antes) ===
-        # ... (tu código de correos queda igual)
+        # === CORREOS  ===
+        # ... ( código de correos queda igual)
 
         messages.success(request, f"¡Orden #{orden.id} creada con éxito!")
         return redirect('orden_exitosa', orden_id=orden.id)
@@ -500,7 +500,7 @@ def recuperar_password(request):
         elif User.objects.filter(email__iexact=entrada).exists():
             user = User.objects.get(email__iexact=entrada)
 
-        # 3. BUSCAR POR RUT (AHORA SÍ FUNCIONA PERFECTO)
+        # 3. BUSCAR POR RUT 
         else:
             rut_limpio = re.sub(r'[^\dKk]', '', entrada).upper()
             if len(rut_limpio) >= 8:
@@ -512,7 +512,7 @@ def recuperar_password(request):
                 except Perfil.DoesNotExist:
                     pass
 
-        # CORREGIDO: esta línea estaba al revés!
+        
         if user is None:
             messages.error(request, "No encontramos ninguna cuenta con ese usuario, correo o RUT.")
             return redirect('login')
@@ -526,7 +526,7 @@ def recuperar_password(request):
 
         link = request.build_absolute_uri(reverse('cambiar_password', args=[token]))
 
-        # === CORREO BONITO Y FUNCIONAL EN CELULAR ===
+        # === CORREO FUNCIONAL EN CELULAR ===
         html_content = render_to_string('emails/recuperar_password.html', {
             'cliente': user.perfil.nombre_completo() if hasattr(user, 'perfil') and user.perfil.nombre else user.username,
             'link': link,
@@ -569,7 +569,7 @@ def cambiar_correo_registro(request):
         if User.objects.filter(username__iexact=identificador).exists():
             user = User.objects.get(username__iexact=identificador)
 
-        # 2. BUSCAR POR RUT (AHORA SÍ FUNCIONA AL 100%)
+        # 2. BUSCAR POR RUT 
         else:
             rut_limpio = re.sub(r'[^\dKk]', '', identificador).upper()
             if len(rut_limpio) >= 8:
@@ -667,7 +667,7 @@ def autocompletar_direccion(request):
         if len(texto) < 2 or not comuna:
             return JsonResponse({"sugerencias": []}, safe=False)
 
-        # ESTA ES LA MAGIA: User-Agent + URL correcta
+        # User-Agent + URL correcta
         headers = {
             "User-Agent": "DistribuidoraTalagante/1.0 (+56912345678)",  # PON TU NÚMERO AQUÍ
             "Accept-Language": "es"
@@ -704,7 +704,7 @@ def autocompletar_direccion(request):
         return JsonResponse({"sugerencias": sugerencias[:8]}, safe=False)
 
     except Exception as e:
-        print("Error en autocompletar:", e)  # para que veas si hay error
+        print("Error en autocompletar:", e) 
         return JsonResponse({"sugerencias": []}, safe=False)
 
 @login_required
@@ -813,7 +813,6 @@ def actualizar_cantidad_carrito(request, item_id):
             if item.cantidad > 1:
                 item.cantidad -= 1
         else:
-            # Si escriben directo en el input
             if 1 <= nueva_cantidad <= item.producto.stock:
                 item.cantidad = nueva_cantidad
 
@@ -857,7 +856,7 @@ def add_to_carrito(request, producto_id):
         messages.error(request, f"¡{producto.nombre} está sin stock!")
         return redirect('catalogo')
 
-    # Obtener o crear carrito activo (15 minutos)
+    
     carrito, _ = Carrito.objects.get_or_create(
         usuario=request.user,
         creado__gte=timezone.now() - timedelta(minutes=15)
@@ -1008,7 +1007,7 @@ def admin_home(request):
     elif orden_id:
         try:
             orden = Orden.objects.get(id=orden_id)
-            orden.estado = 'cancelado'  # Esto activa el método save para restaurar stock
+            orden.estado = 'cancelado'  # Esto activa el metodo save para restaurar stock
             orden.save()
             messages.success(request, f'Orden #{orden.id} cancelada y stock restaurado.')
         except Orden.DoesNotExist:
@@ -1039,7 +1038,6 @@ def producto_create(request):
             messages.success(request, "Producto creado correctamente")
             return redirect('producto_list')
     else:
-        # Si viene código en la URL → prellenar el campo
         initial_data = {}
         if codigo_prellenado:
             initial_data['codigo_barras'] = codigo_prellenado
@@ -1048,7 +1046,7 @@ def producto_create(request):
     return render(request, 'core/producto_form.html', {
         'form': form,
         'action': 'Crear',
-        'codigo_prellenado': codigo_prellenado  # opcional: para mostrar en el template
+        'codigo_prellenado': codigo_prellenado  
     })
 
 @login_required
@@ -1210,7 +1208,7 @@ def gestion_estados(request):
     if estado_filtro:
         ordenes = ordenes.filter(estado=estado_filtro)
 
-    # 3. Lógica POST (Cambio de estado rápido)
+    # 3. Logica POST (Cambio de estado rápido)
     if request.method == 'POST':
         orden_id = request.POST.get('orden_id')
         nuevo_estado = request.POST.get('estado')
@@ -1221,7 +1219,7 @@ def gestion_estados(request):
             orden.estado = nuevo_estado
             orden.save()
 
-            # Mensaje de WhatsApp y Correo (Tu lógica original)
+            # Mensaje de WhatsApp y Correo 
             mensaje_wa = f"Hola! Mi pedido es el #{orden.id} - Estado: {orden.get_estado_display()}"
             whatsapp_link = f"https://wa.me/56949071013?text={urllib.parse.quote(mensaje_wa)}"
 
@@ -1304,8 +1302,7 @@ def update_orden_status(request, orden_id):
         else:
             messages.error(request, 'Estado inválido')
         
-        # ESTA ES LA ÚNICA LÍNEA QUE IMPORTA
-        return redirect('/panel/')   # ← AHORA SÍ VUELVE AL PANEL BONITO
+        return redirect('/panel/')   
         
     context = {'orden': orden}
     return render(request, 'core/update_orden_status.html', context)
