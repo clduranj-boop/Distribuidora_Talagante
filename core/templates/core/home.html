@@ -10,33 +10,36 @@
   <div id="heroCarousel" class="carousel slide shadow-lg rounded-4 overflow-hidden mb-5" data-bs-ride="carousel">
     
     <div class="carousel-indicators">
-      <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
-      <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
+      {% for banner in banners %}
+        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="{{ forloop.counter0 }}" class="{% if forloop.first %}active{% endif %}" aria-current="true"></button>
+      {% endfor %}
     </div>
     
     <div class="carousel-inner" style="background-color: #f8f9fa;">
       
-      <div class="carousel-item active" data-bs-interval="5000">
-        <div class="d-flex align-items-center justify-content-center bg-white" style="height: 400px;">
-            <img src="{% static 'core/img/Feliz_navidad_logo.png' %}" 
-                 class="h-100 w-auto" 
-                 alt="Feliz Navidad" 
-                 style="max-width: 100%; object-fit: contain;">
+      {% for banner in banners %}
+        <div class="carousel-item {% if forloop.first %}active{% endif %}" data-bs-interval="5000">
+          <div class="d-flex align-items-center justify-content-center bg-white" style="height: 400px;">
+              {% if banner.imagen %}
+                <img src="{{ banner.imagen.url }}" 
+                     class="h-100 w-auto" 
+                     alt="{{ banner.titulo }}" 
+                     style="max-width: 100%; object-fit: contain;">
+              {% endif %}
+          </div>
+          
+          <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded-3 px-4">
+            <h2 class="fw-bold">{{ banner.titulo }}</h2>
+          </div>
         </div>
-        <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded-3 px-4">
-          <h2 class="fw-bold">¡Modo Navidad Activado! 🎄</h2>
-          <p>Encuentra todo para tu cena navideña con nosotros.</p>
-        </div>
-      </div>
 
-      <div class="carousel-item" data-bs-interval="5000">
-        <div class="d-flex align-items-center justify-content-center bg-white" style="height: 400px;">
-            <img src="{% static 'core/img/Modo_navidad.png' %}" 
-                 class="h-100 w-auto" 
-                 alt="Modo Navidad Activado" 
-                 style="max-width: 100%; object-fit: contain;">
+      {% empty %}
+        <div class="carousel-item active" data-bs-interval="5000">
+           <div class="d-flex align-items-center justify-content-center bg-white" style="height: 400px;">
+              <h2 class="text-muted">Bienvenido a Distribuidora Talagante</h2>
+           </div>
         </div>
-      </div>
+      {% endfor %}
 
     </div>
 
