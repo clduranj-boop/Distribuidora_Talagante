@@ -122,7 +122,6 @@ NUMBER_GROUPING = 3
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']           # carpeta donde va el CSS/JS/imágenes
 STATIC_ROOT = BASE_DIR / 'staticfiles'             # donde collectstatic los copia
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
