@@ -143,13 +143,18 @@ class Orden(models.Model):
     metodo_pago = models.CharField(max_length=20, choices=METODOS_PAGO, default='transferencia')
     instrucciones_transferencia = models.TextField(default="Realice transferencia a Cuenta Corriente XXXX-XXXX y envíe comprobante por WhatsApp.")
 
-    # CAMPO CORREGIDO: solo imagen
-    comprobante = models.ImageField(upload_to='comprobantes/', blank=True, null=True, help_text="Foto del comprobante de pago")
+    
+    
+    # Campo de texto para guardar la imagen codificada
+    comprobante_b64 = models.TextField(blank=True, null=True, verbose_name="Comprobante (Base64)")
 
-    # CAMPO NUEVO: para notas o links (ej: link de WebPay, comentario, etc.)
+    # Se mantiene por si quieres guardar notas extra
     nota_comprobante = models.TextField(blank=True, null=True, help_text="Link o nota del comprobante (opcional)")
 
     mensaje_cliente = models.TextField(blank=True, help_text="Mensaje opcional del cliente")
+
+    def __str__(self):
+        return f"Orden #{self.id} - {self.usuario.username}"
 
     def get_whatsapp_link(self):
         """Devuelve link directo a WhatsApp con el número del cliente"""
