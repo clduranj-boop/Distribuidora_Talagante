@@ -1475,3 +1475,28 @@ def autocompletar_direccion(request):
     except Exception as e:
         print("ERROR AUTOCOMPLETAR:", e)
         return JsonResponse({"sugerencias": [], "debug": str(e)})
+
+# --- VISTA PARA GESTIONAR BANNERS (FRONTEND) ---
+def gestion_banners(request):
+    
+    if not request.user.is_staff:
+        return redirect('home')
+
+    
+    if request.method == 'POST' and 'crear_banner' in request.POST:
+        titulo = request.POST.get('titulo')
+        imagen = request.FILES.get('imagen')
+        if titulo and imagen:
+            Banner.objects.create(titulo=titulo, imagen=imagen)
+            return redirect('gestion_banners') 
+
+    
+    if request.method == 'POST' and 'eliminar_banner' in request.POST:
+        banner_id = request.POST.get('banner_id')
+        banner = get_object_or_404(Banner, id=banner_id)
+        banner.delete()
+        return redirect('gestion_banners')
+
+    
+    banners = Banner.objects.all().order_by('orden')
+    return render(request, 'core/gestion_banners.html', {'banners': banners})
