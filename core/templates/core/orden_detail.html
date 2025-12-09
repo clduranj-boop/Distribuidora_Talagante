@@ -41,7 +41,6 @@
 
     <div class="row g-4">
 
-        <!-- CLIENTE -->
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden">
                 <div class="card-header bg-dark text-white py-3 px-4">
@@ -91,7 +90,6 @@
             </div>
         </div>
 
-        <!-- ENVÍO (NUEVA SECCIÓN CON COMUNA + WHATSAPP) -->
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden">
                 <div class="card-header py-3 px-4 text-white" style="background: linear-gradient(135deg, #28a745, #20c997);">
@@ -129,7 +127,6 @@
             </div>
         </div>
 
-        <!-- PAGO -->
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden">
                 <div class="card-header bg-white border-bottom py-3 px-4">
@@ -155,14 +152,25 @@
                         </div>
                     </div>
 
-                    {% if orden.comprobante %}
-                        <a href="{{ orden.comprobante.url }}" target="_blank" class="btn btn-outline-secondary w-100 rounded-pill btn-sm">
-                            Ver Comprobante
-                        </a>
-                    {% else %}
-                        <span class="badge bg-light text-muted border fw-normal py-2">Sin comprobante</span>
-                    {% endif %}
-
+                    <div class="mt-2">
+                        <strong class="d-block text-muted small mb-2">COMPROBANTE:</strong>
+                        
+                        {% if orden.comprobante_b64 %}
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#modalComprobante" title="Clic para agrandar">
+                                <img src="data:image/jpeg;base64,{{ orden.comprobante_b64 }}" 
+                                     alt="Comprobante Transferencia" 
+                                     class="img-fluid rounded border shadow-sm"
+                                     style="max-height: 180px; object-fit: contain; cursor: zoom-in;">
+                            </a>
+                            <div class="mt-2">
+                                <small class="text-success fw-bold"><i class="bi bi-check-circle-fill"></i> Comprobante Cargado</small>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-secondary border-0 py-2 small">
+                                Sin comprobante adjunto
+                            </div>
+                        {% endif %}
+                    </div>
                     {% if user.is_superuser %}
                     <div class="card-footer bg-light p-3 mt-auto">
                         <div class="d-grid gap-2">
@@ -179,7 +187,6 @@
             </div>
         </div>
 
-        <!-- PRODUCTOS -->
         <div class="col-12">
             <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
                 <div class="card-header py-3 px-4 text-white" style="background-color: #748C28;">
@@ -230,6 +237,25 @@
 
     </div>
 </div>
+
+{% if orden.comprobante_b64 %}
+<div class="modal fade" id="modalComprobante" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel">Comprobante de Pago - Orden #{{ orden.id }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center bg-light">
+                <img src="data:image/jpeg;base64,{{ orden.comprobante_b64 }}" class="img-fluid shadow-sm rounded">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 
 <style>
     .ls-1 { letter-spacing: 1px; }
