@@ -470,7 +470,7 @@ def checkout(request):
                     subject=f"NUEVO PEDIDO #{orden.id} - {nombre_cliente}",
                     body=f"Nuevo pedido de {orden.usuario.email}",
                     from_email=settings.DEFAULT_FROM_EMAIL,
-                    to=['distribuidora.talagante@gmail.com'],
+                    to=['fabriicratos10@gmail.com'],
                 )
                 email_admin.attach_alternative(html_admin, "text/html")
                 if orden.comprobante:
