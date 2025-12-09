@@ -379,7 +379,7 @@ def checkout(request):
             messages.error(request, "Debes seleccionar una comuna para el envío.")
             return redirect('checkout')
 
-        with transaction.atomic():  # ← Esto es clave: si algo falla, se revierte todo
+        with transaction.atomic():
             orden = Orden.objects.create(
                 usuario=request.user,
                 total=subtotal,
@@ -388,21 +388,18 @@ def checkout(request):
                 estado='confirmacion' if comprobante else 'pendiente'
             )
 
-            # === DESCONTAR STOCK ===
+            # Descontar stock y crear ítems
             for item in items:
                 if item.cantidad > item.producto.stock:
                     messages.error(request, f"No hay suficiente stock de {item.producto.nombre}")
                     raise ValueError("Stock insuficiente")
 
-                # Crear ítem de la orden
                 ItemOrden.objects.create(
                     orden=orden,
                     producto=item.producto,
                     cantidad=item.cantidad,
                     precio=item.producto.precio
                 )
-
-                # === RESTAR STOCK ===
                 item.producto.stock -= item.cantidad
                 item.producto.save()
 
@@ -420,17 +417,13 @@ def checkout(request):
             # Cálculo de envío
             ZONAS_TALAGANTE = ['talagante', 'penaflor', 'isla_de_maipo', 'el_monte', 'padre_hurtado']
             costo_envio = Decimal('0')
-            texto_envio = "Retiro en local – GRATIS"
-
             if metodo_envio == 'domicilio':
-                if comuna in ZONAS_TALAGANTE:
+                if comuna.lower() in ZONAS_TALAGANTE:
                     costo_envio = Decimal('2500')
-                    texto_envio = f"Envío a {dict(COMUNAS_RM).get(comuna, comuna).title()} – $2.500"
                 elif subtotal >= Decimal('40000'):
-                    texto_envio = "Envío GRATIS (compra ≥ $40.000)"
+                    costo_envio = Decimal('0')
                 else:
                     costo_envio = Decimal('4500')
-                    texto_envio = "Envío RM – $4.500"
 
             orden.total = subtotal + costo_envio
             orden.save()
@@ -442,8 +435,52 @@ def checkout(request):
             # Limpiar carrito
             carrito.itemcarrito_set.all().delete()
 
-        # === CORREOS  ===
-        # ... ( código de correos queda igual)
+            # ==================== ENVÍO DE CORREOS ====================
+            try:
+                from django.template.loader import render_to_string
+                from django.core.mail import EmailMultiAlternatives
+                from django.conf import settings
+
+                nombre_cliente = (orden.usuario.perfil.nombre_completo()
+                                 if hasattr(orden.usuario, 'perfil') and orden.usuario.perfil
+                                 else orden.usuario.username)
+
+                # Correo al cliente
+                html_cliente = render_to_string('emails/confirmacion_cliente.html', {
+                    'orden': orden,
+                    'cliente': nombre_cliente,
+                    'items': orden.itemorden_set.all(),
+                })
+                email_cliente = EmailMultiAlternatives(
+                    subject=f"¡Gracias por tu pedido #{orden.id}! - Distribuidora Talagante",
+                    body="Tu pedido ha sido recibido.",
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    to=[orden.usuario.email],
+                )
+                email_cliente.attach_alternative(html_cliente, "text/html")
+                email_cliente.send()
+
+                # Correo al administrador
+                html_admin = render_to_string('emails/nueva_orden_admin.html', {
+                    'orden': orden,
+                    'cliente': nombre_cliente,
+                    'items': orden.itemorden_set.all(),
+                })
+                email_admin = EmailMultiAlternatives(
+                    subject=f"NUEVO PEDIDO #{orden.id} - {nombre_cliente}",
+                    body=f"Nuevo pedido de {orden.usuario.email}",
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    to=['distribuidora.talagante@gmail.com'],
+                )
+                email_admin.attach_alternative(html_admin, "text/html")
+                if orden.comprobante:
+                    email_admin.attach(orden.comprobante.name, orden.comprobante.read())
+                email_admin.send()
+
+            except Exception as e:
+                print(f"ERROR ENVÍO CORREO PEDIDO {orden.id}: {e}")
+
+            # =========================================================
 
         messages.success(request, f"¡Orden #{orden.id} creada con éxito!")
         return redirect('orden_exitosa', orden_id=orden.id)
