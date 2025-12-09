@@ -5,7 +5,6 @@ admin.site.register(Perfil)
 admin.site.register(Producto)
 admin.site.register(Carrito)
 admin.site.register(ItemCarrito)
-admin.site.register(Orden)
 admin.site.register(ItemOrden)
 admin.site.register(ConfiguracionHome)
 
