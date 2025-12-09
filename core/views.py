@@ -945,24 +945,13 @@ def restar_producto(request, item_id):
     return redirect('carrito')
 
 
-def remove_from_carrito(request, item_id):
-    print(f"--- ELIMINANDO ITEM {item_id} ---")
-    
-    item = ItemOrden.objects.filter(id=item_id).first()
-    
-    if item:
-        item.delete()
-        print("--- ELIMINADO ---")
-        
-    return redirect('carrito')
-
 @login_required
 def remove_from_carrito(request, item_id):
+    
     item = get_object_or_404(ItemCarrito, id=item_id, carrito__usuario=request.user)
-    producto = item.producto
-    producto.stock += item.cantidad
-    producto.save()
+    
     item.delete()
+    
     return redirect('carrito')
 
 
