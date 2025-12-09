@@ -1,4 +1,5 @@
 ﻿import json
+import base64
 from os import link
 import socket
 from django.shortcuts import render, redirect, get_object_or_404
@@ -366,93 +367,125 @@ def checkout(request):
         return redirect('carrito')
 
     items = carrito.itemcarrito_set.all()
+    # Calculamos subtotal preliminar
     subtotal = sum(item.cantidad * item.producto.precio for item in items)
 
     if request.method == 'POST':
         metodo_pago = request.POST.get('metodo_pago', 'transferencia')
         mensaje = request.POST.get('mensaje', '').strip()
-        comprobante = request.FILES.get('comprobante')
         metodo_envio = request.POST.get('metodo_envio', 'retiro')
         comuna = request.POST.get('comuna', '') if metodo_envio == 'domicilio' else None
 
+        # Validación de comuna
         if metodo_envio == 'domicilio' and not comuna:
             messages.error(request, "Debes seleccionar una comuna para el envío.")
             return redirect('checkout')
 
-        with transaction.atomic():
-            orden = Orden.objects.create(
-                usuario=request.user,
-                total=subtotal,
-                metodo_pago=metodo_pago,
-                mensaje_cliente=mensaje,
-                estado='confirmacion' if comprobante else 'pendiente'
-            )
+        # === 1. PROCESAMIENTO DE IMAGEN A BASE64 ===
+        comprobante_img = request.FILES.get('comprobante')
+        imagen_b64_final = None
 
-            # Descontar stock y crear ítems
-            for item in items:
-                if item.cantidad > item.producto.stock:
-                    messages.error(request, f"No hay suficiente stock de {item.producto.nombre}")
-                    raise ValueError("Stock insuficiente")
+        if comprobante_img:
+            # Validar tamaño (5MB)
+            if comprobante_img.size > 5 * 1024 * 1024:
+                messages.error(request, "El archivo es muy pesado (Máx 5MB).")
+                return redirect('checkout')
+            
+            # Validar tipo
+            if comprobante_img.content_type not in ['image/jpeg', 'image/png', 'image/jpg']:
+                messages.error(request, "Formato inválido. Solo JPG o PNG.")
+                return redirect('checkout')
 
-                ItemOrden.objects.create(
-                    orden=orden,
-                    producto=item.producto,
-                    cantidad=item.cantidad,
-                    precio=item.producto.precio
+            # Convertir
+            try:
+                imagen_binaria = comprobante_img.read()
+                imagen_b64_final = base64.b64encode(imagen_binaria).decode('utf-8')
+            except Exception:
+                messages.error(request, "Error procesando la imagen.")
+                return redirect('checkout')
+
+        # === 2. TRANSACCIÓN SEGURA (STOCK) ===
+        try:
+            with transaction.atomic():
+                # Crear orden inicial
+                orden = Orden.objects.create(
+                    usuario=request.user,
+                    total=0, # Se recalcula abajo
+                    metodo_pago=metodo_pago,
+                    mensaje_cliente=mensaje,
+                    estado='confirmacion' if imagen_b64_final else 'pendiente',
+                    comprobante_b64=imagen_b64_final  # <--- GUARDAMOS EL TEXTO
                 )
-                item.producto.stock -= item.cantidad
-                item.producto.save()
 
-            # Guardar envío
-            if metodo_envio == 'domicilio':
-                DireccionEnvio.objects.create(
-                    orden=orden,
-                    metodo='domicilio',
-                    comuna=comuna,
-                    notas="Cliente coordinará dirección exacta por WhatsApp"
-                )
-            else:
-                DireccionEnvio.objects.create(orden=orden, metodo='retiro')
+                total_real = 0
 
-            # Cálculo de envío
-            ZONAS_TALAGANTE = ['talagante', 'penaflor', 'isla_de_maipo', 'el_monte', 'padre_hurtado']
-            costo_envio = Decimal('0')
-            if metodo_envio == 'domicilio':
-                if comuna.lower() in ZONAS_TALAGANTE:
-                    costo_envio = Decimal('2500')
-                elif subtotal >= Decimal('40000'):
-                    costo_envio = Decimal('0')
+                # Bucle seguro de stock
+                for item in items:
+                    # BLOQUEO DE BASE DE DATOS (select_for_update)
+                    try:
+                        producto_db = Producto.objects.select_for_update().get(id=item.producto.id)
+                    except Producto.DoesNotExist:
+                        raise ValueError(f"El producto {item.producto.nombre} ya no está disponible.")
+
+                    if item.cantidad > producto_db.stock:
+                        raise ValueError(f"No hay suficiente stock de {producto_db.nombre}")
+
+                    # Crear ItemOrden
+                    ItemOrden.objects.create(
+                        orden=orden,
+                        producto=producto_db,
+                        cantidad=item.cantidad,
+                        precio=producto_db.precio
+                    )
+
+                    # Descontar stock REAL
+                    producto_db.stock -= item.cantidad
+                    producto_db.save()
+
+                    total_real += (producto_db.precio * item.cantidad)
+
+                # === 3. LOGICA DE ENVÍO ===
+                costo_envio = Decimal('0')
+                
+                if metodo_envio == 'domicilio':
+                    DireccionEnvio.objects.create(
+                        orden=orden, metodo='domicilio', comuna=comuna,
+                        notas="Cliente coordinará por WhatsApp"
+                    )
+                    # Tu lógica de precios de envío
+                    ZONAS_TALAGANTE = ['talagante', 'penaflor', 'isla_de_maipo', 'el_monte', 'padre_hurtado']
+                    comuna_lower = comuna.lower().replace(' ', '_') # Normalizar un poco
+
+                    if comuna_lower in ZONAS_TALAGANTE:
+                         costo_envio = Decimal('2500')
+                    elif total_real >= Decimal('40000'):
+                         costo_envio = Decimal('0')
+                    else:
+                         costo_envio = Decimal('4500')
                 else:
-                    costo_envio = Decimal('4500')
+                    DireccionEnvio.objects.create(orden=orden, metodo='retiro')
 
-            orden.total = subtotal + costo_envio
-            orden.save()
-
-            if comprobante:
-                orden.comprobante = comprobante
+                orden.total = total_real + costo_envio
                 orden.save()
 
-            # Limpiar carrito
-            carrito.itemcarrito_set.all().delete()
+                # Limpiar carrito
+                carrito.itemcarrito_set.all().delete()
 
-            # ==================== ENVÍO DE CORREOS ====================
+            # === FIN DE LA TRANSACCIÓN ===
+            # Si llegamos aquí, la orden se creó bien.
+
+            # === 4. ENVÍO DE CORREOS ===
             try:
-                from django.template.loader import render_to_string
-                from django.core.mail import EmailMultiAlternatives
-                from django.conf import settings
-
                 nombre_cliente = (orden.usuario.perfil.nombre_completo()
                                  if hasattr(orden.usuario, 'perfil') and orden.usuario.perfil
                                  else orden.usuario.username)
 
-                # Correo al cliente
+                # Correo Cliente
                 html_cliente = render_to_string('emails/confirmacion_cliente.html', {
-                    'orden': orden,
-                    'cliente': nombre_cliente,
-                    'items': orden.itemorden_set.all(),
+                    'orden': orden, 'cliente': nombre_cliente, 'items': orden.itemorden_set.all()
                 })
                 email_cliente = EmailMultiAlternatives(
-                    subject=f"¡Gracias por tu pedido #{orden.id}! - Distribuidora Talagante",
+                    subject=f"¡Gracias por tu pedido #{orden.id}!",
                     body="Tu pedido ha sido recibido.",
                     from_email=settings.DEFAULT_FROM_EMAIL,
                     to=[orden.usuario.email],
@@ -460,30 +493,38 @@ def checkout(request):
                 email_cliente.attach_alternative(html_cliente, "text/html")
                 email_cliente.send()
 
-                # Correo al administrador
+                # Correo Admin
                 html_admin = render_to_string('emails/nueva_orden_admin.html', {
-                    'orden': orden,
-                    'cliente': nombre_cliente,
-                    'items': orden.itemorden_set.all(),
+                    'orden': orden, 'cliente': nombre_cliente, 'items': orden.itemorden_set.all()
                 })
                 email_admin = EmailMultiAlternatives(
-                    subject=f"NUEVO PEDIDO #{orden.id} - {nombre_cliente}",
+                    subject=f"NUEVO PEDIDO #{orden.id}",
                     body=f"Nuevo pedido de {orden.usuario.email}",
                     from_email=settings.DEFAULT_FROM_EMAIL,
-                    to=['fabriicratos10@gmail.com'],
+                    to=[settings.ADMIN_EMAIL_RECEIVER], # Usar variable de settings mejor
                 )
                 email_admin.attach_alternative(html_admin, "text/html")
-                if orden.comprobante:
-                    email_admin.attach(orden.comprobante.name, orden.comprobante.read())
+                
+                # NOTA: Ya no adjuntamos el archivo físico porque está en Base64 en la BD.
+                # El admin debe entrar al panel para ver la imagen.
+                
                 email_admin.send()
 
             except Exception as e:
-                print(f"ERROR ENVÍO CORREO PEDIDO {orden.id}: {e}")
+                print(f"ERROR CORREOS: {e}")
 
-            # =========================================================
+            messages.success(request, f"¡Orden #{orden.id} creada con éxito!")
+            return redirect('orden_exitosa', orden_id=orden.id)
 
-        messages.success(request, f"¡Orden #{orden.id} creada con éxito!")
-        return redirect('orden_exitosa', orden_id=orden.id)
+        except ValueError as e:
+            # Error de stock
+            messages.error(request, str(e))
+            return redirect('checkout')
+        except Exception as e:
+            # Error inesperado
+            print(f"ERROR CHECKOUT: {e}")
+            messages.error(request, "Ocurrió un error al procesar tu pedido.")
+            return redirect('checkout')
 
     context = {
         'items': items,
