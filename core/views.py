@@ -938,8 +938,10 @@ def admin_home(request):
     productos_bajo_stock = Producto.objects.filter(stock__lt=10)
     estado_filtro = request.GET.get('estado', '')  # Filtro por estado desde la URL
     ordenes_query = Orden.objects.filter(estado__in=['pendiente', 'confirmacion', 'preparacion'])
+    
     if estado_filtro:
         ordenes_query = ordenes_query.filter(estado=estado_filtro)
+    
     ordenes = ordenes_query.order_by('-fecha')
     paginator = Paginator(ordenes, 10)  # 10 órdenes por página
     page_number = request.GET.get('page')
@@ -947,20 +949,34 @@ def admin_home(request):
 
     item_id = request.GET.get('delete_item')
     orden_id = request.GET.get('delete_orden')
+
     if item_id:
         try:
             item = ItemOrden.objects.get(id=item_id)
             orden = item.orden
             producto = item.producto
             cantidad = item.cantidad
-            item.delete()
-            producto.stock += cantidad
-            producto.save()
-            orden.total -= item.cantidad * item.precio
+            precio = item.precio
+
+            # 1. BORRAMOS EL ÍTEM
+            # Al ejecutar esta línea, la "Señal" en models.py detecta el borrado 
+            # y devuelve el stock automáticamente.
+            item.delete() 
+
+            # --- CORRECCIÓN APLICADA ---
+            # Borramos estas líneas para evitar que se sume dos veces.
+            # producto.stock += cantidad  <-- ELIMINADO
+            # producto.save()             <-- ELIMINADO
+            # ---------------------------
+
+            # 2. Actualizamos el precio total de la orden
+            orden.total -= cantidad * precio
             orden.save()
+
             messages.success(request, f'Ítem "{producto.nombre}" eliminado de la orden #{orden.id}. Stock restaurado.')
         except ItemOrden.DoesNotExist:
             messages.error(request, 'Ítem no encontrado.')
+
     elif orden_id:
         try:
             orden = Orden.objects.get(id=orden_id)
