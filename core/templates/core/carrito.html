@@ -41,10 +41,12 @@
                     {% endif %}
                     <div>
                       <div class="fw-bold">{{ it.producto.nombre }}</div>
-                      <small class="text-success">Stock: {{ it.producto.stock|floatformat:0 }}</small>
+                        <small class="text-success fw-bold">Stock Bodega: {{ it.producto.stock|floatformat:0 }}</small>
+                          <br>
+                            <small class="text-muted" style="font-size: 0.8rem;">
+                           (Disponibles: {{ it.producto.stock|sub:it.cantidad }})
+                            </small>
                     </div>
-                  </td>
-
                   <td class="fw-bold">${{ it.producto.precio|floatformat:0|intcomma }}</td>
 
                   <!-- CANTIDAD ULTRA LINDA Y FUNCIONAL -->
