@@ -50,5 +50,6 @@ urlpatterns = [
     path('cambiar-password/<str:token>/', views.cambiar_password_view, name='cambiar_password'),
     path('cambiar-correo-registro/', views.cambiar_correo_registro, name='cambiar_correo_registro'),
     path('admin/producto/crear-con-codigo/', views.redirigir_crear_producto_con_codigo, name='crear_producto_con_codigo'),
+    path('panel/banners/', views.gestion_banners, name='gestion_banners'),
     
 ]
