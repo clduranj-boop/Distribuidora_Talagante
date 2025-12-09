@@ -41,8 +41,6 @@ urlpatterns = [
     path('pedidos-finalizados/', views.pedidos_finalizados, name='pedidos_finalizados'),
     path('pedidos-despacho/', views.pedidos_despacho, name='pedidos_despacho'),
     path('test-correo/', views.test_correo),
-    path('sumar/<int:item_id>/', views.sumar_producto, name='sumar_producto'),
-    path('restar/<int:item_id>/', views.restar_producto, name='restar_producto'),
     path('carrito/actualizar/<int:item_id>/', views.actualizar_cantidad_carrito, name='actualizar_cantidad_carrito'),
     path('autocompletar-direccion/', views.autocompletar_direccion, name='autocompletar_direccion'),
     path('reenviar-codigo/', views.reenviar_codigo, name='reenviar_codigo'),
