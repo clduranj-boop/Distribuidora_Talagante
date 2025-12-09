@@ -907,44 +907,6 @@ from django.shortcuts import render, redirect
 from .models import ItemOrden, Producto # 
 
 
-def sumar_producto(request, item_id):
-    print(f"--- INTENTO SUMAR ITEM {item_id} ---")
-
- 
-    item = ItemOrden.objects.filter(id=item_id).first()
-    
-    if item:
-        if item.producto.stock > item.cantidad:
-            item.cantidad += 1
-            item.save()
-            print(f"--- NUEVA CANTIDAD: {item.cantidad} ---")
-        else:
-            print("--- NO HAY MÁS STOCK ---")
-    else:
-        print("--- ITEM NO ENCONTRADO (Tal vez ya se borró) ---")
-    
-    return redirect('carrito')
-
-
-def restar_producto(request, item_id):
-    print(f"--- INTENTO RESTAR ITEM {item_id} ---")
-    
-    item = ItemOrden.objects.filter(id=item_id).first()
-    
-    if item:
-        if item.cantidad > 1:
-            item.cantidad -= 1
-            item.save()
-            print(f"--- RESTADO. NUEVA CANTIDAD: {item.cantidad} ---")
-        else:
-            item.delete()
-            print("--- ELIMINADO POR LLEGAR A 0 ---")
-    else:
-        print("--- ITEM NO ENCONTRADO ---")
-            
-    return redirect('carrito')
-
-
 @login_required
 def remove_from_carrito(request, item_id):
     
