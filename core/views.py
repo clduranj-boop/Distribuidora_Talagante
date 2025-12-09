@@ -819,25 +819,56 @@ def cambiar_estado_pedido(request, pk):
     
     if request.method == "POST":
         nuevo_estado = request.POST.get('estado')
-        if nuevo_estado in dict(Orden.ESTADOS):
-            orden.estado = nuevo_estado
-            orden.save()
-            
-            if orden.usuario.email:
-                send_mail(
-                    f"Tu pedido #{orden.id} ha cambiado de estado",
-                    f"Hola {orden.usuario.username},\n\nTu pedido ahora está en: {orden.get_estado_display()}\n\n¡Gracias por comprar en Distribuidora Talagante!",
-                    settings.EMAIL_HOST_USER,
-                    [orden.usuario.email],
-                    fail_silently=True,
-                )
-            
-            messages.success(request, f"Estado actualizado a {orden.get_estado_display()}")
-        else:
+        if nuevo_estado not in dict(Orden.ESTADOS):
             messages.error(request, "Estado inválido")
+            return redirect('admin_panel')
+        
+        estado_anterior = orden.get_estado_display()
+        orden.estado = nuevo_estado
+        orden.save()
+
+        # === ENVÍO DE CORREO BONITO AL CLIENTE ===
+        if orden.usuario.email:
+            try:
+                from django.template.loader import render_to_string
+                from django.core.mail import EmailMultiAlternatives
+                from django.conf import settings
+                import urllib.parse
+
+                nombre_cliente = (orden.usuario.perfil.nombre_completo() 
+                                if hasattr(orden.usuario, 'perfil') and orden.usuario.perfil 
+                                else orden.usuario.username)
+
+                mensaje_wa = f"Hola! Mi pedido es el #{orden.id} - Estado actual: {orden.get_estado_display()}"
+                whatsapp_link = f"https://wa.me/56949071013?text={urllib.parse.quote(mensaje_wa)}"
+
+                html_content = render_to_string('emails/cambio_estado.html', {
+                    'cliente': nombre_cliente,
+                    'pedido_id': orden.id,
+                    'estado_anterior': estado_anterior,
+                    'nuevo_estado': orden.get_estado_display(),
+                    'total': orden.total,
+                    'whatsapp_link': whatsapp_link,
+                    'items': orden.itemorden_set.all(),
+                })
+
+                email = EmailMultiAlternatives(
+                    subject=f"Tu pedido #{orden.id} cambió de estado",
+                    body=f"Tu pedido #{orden.id} ahora está en: {orden.get_estado_display()}",
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    to=[orden.usuario.email],
+                )
+                email.attach_alternative(html_content, "text/html")
+                email.send()
+
+            except Exception as e:
+                print(f"Error enviando correo cambio estado #{orden.id}: {e}")
+
+        messages.success(request, f"Estado cambiado a {orden.get_estado_display()}")
+        return redirect('admin_panel')
     
     return redirect('admin_panel')
-
+    
 @login_required
 def actualizar_cantidad_carrito(request, item_id):
     item = get_object_or_404(ItemCarrito, id=item_id, carrito__usuario=request.user)
