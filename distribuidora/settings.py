@@ -1,6 +1,4 @@
-¡Listo! Acá tienes tu settings.py 100 % funcional para Render y local, limpio, ordenado y que nunca más te va a dar 500 por static/favicon/hosts.
-Copia y pega esto completo (reemplaza todo tu settings.py actual):
-Pythonimport os
+import os
 from pathlib import Path
 from django.contrib.messages import constants as messages
 import dj_database_url
